@@ -1,0 +1,16 @@
+@layer kora.components {
+    kora-icon {
+        display: inline-flex;
+        flex: none;
+        width: var(--kora-icon-size, 1em);
+        height: var(--kora-icon-size, 1em);
+        line-height: 0;
+        color: inherit;
+    }
+
+    kora-icon svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+}

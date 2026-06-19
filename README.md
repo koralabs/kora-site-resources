@@ -43,6 +43,7 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `kora-select` | handle.me | custom dropdown + hidden input for form submission |
 | `kora-tabs` | handle.me | segmented control, `kora-tab-change` event |
 | `kora-collapsible` | handle.me | accordion (CSS grid-rows height animation) |
+| `kora-icon` | Lucide | canonical icon: `<kora-icon name="wallet" size="20">`, currentColor, curated set built in; register more from `/icons/lucide` (no separate install) |
 | `.kora-glass*` | hal.handle.me | frosted-glass utility classes |
 | `.kora-scrollbar` / `.kora-focus-ring` / `.kora-inset-shadow*` | handle.me | style utilities (`styles/utilities.css`) |
 

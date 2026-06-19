@@ -1,6 +1,6 @@
 {
     "name": "@koralabs/kora-site-resources",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
     "type": "module",
     "license": "ISC",
@@ -49,9 +49,20 @@
             "types": "./tokens/index.d.ts",
             "default": "./tokens/index.js"
         },
+        "./icons": {
+            "types": "./icons/index.d.ts",
+            "default": "./icons/index.js"
+        },
+        "./icons/lucide": {
+            "types": "./icons/lucide.d.ts",
+            "default": "./icons/lucide.js"
+        },
+        "./icons/kora-icon.css": "./icons/kora-icon.css",
         "./tokens.css": "./tokens/tokens.css",
         "./styles/layers.css": "./styles/layers.css",
         "./styles/reset.css": "./styles/reset.css",
+        "./styles/glass.css": "./styles/glass.css",
+        "./styles/utilities.css": "./styles/utilities.css",
         "./components/*": {
             "types": "./components/*/index.d.ts",
             "default": "./components/*/index.js"
@@ -65,7 +76,8 @@
         "lint": "tsc --noEmit"
     },
     "dependencies": {
-        "cborg": "^5.1.1"
+        "cborg": "^5.1.1",
+        "lucide": "^1.21.0"
     },
     "peerDependencies": {
         "@koralabs/kora-labs-common": ">=6.7.6"

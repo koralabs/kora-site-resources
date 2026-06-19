@@ -25,6 +25,7 @@
 @import url("/lib/components/forms/kora-select/kora-select.css");
 @import url("/lib/components/navigation/kora-tabs/kora-tabs.css");
 @import url("/lib/components/navigation/kora-collapsible/kora-collapsible.css");
+@import url("/lib/icons/kora-icon.css");
 
 /* Demo-only layout. */
 body {
@@ -86,6 +87,14 @@ body {
 }
 .demo-row--center {
     align-items: center;
+}
+.demo-icons {
+    font-size: 1.75rem;
+    color: var(--kora-color-cyan);
+}
+.demo-icons__note {
+    font-size: var(--kora-text-sm);
+    color: var(--kora-gray-300);
 }
 .demo-help {
     display: inline-flex;

@@ -32,3 +32,4 @@ export * from "./components/forms/kora-input/index.js";
 export * from "./components/forms/kora-select/index.js";
 export * from "./components/navigation/kora-tabs/index.js";
 export * from "./components/navigation/kora-collapsible/index.js";
+export * from "./icons/index.js"; // registers <kora-icon> + the curated default set (no lucide dep pulled)

@@ -56,6 +56,9 @@ export type {
     KoraCollapsibleState,
 } from "../components/navigation/kora-collapsible/template.js";
 
+export { renderKoraIcon, iconSVG } from "../icons/render.js";
+export type { IconNode } from "../icons/registry.js";
+
 export { renderKoraLoader } from "../components/feedback/kora-loader/template.js";
 export type { KoraLoaderProps, KoraLoaderState } from "../components/feedback/kora-loader/template.js";
 
