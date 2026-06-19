@@ -92,6 +92,8 @@ npm test        # builds, then runs node --test under a happy-dom global
 npm run demo    # builds, then serves a sample SSR home page at http://localhost:8088
 ```
 
-The demo (`demo/server.mjs`, vanilla Node, no deps) server-renders a home page with every
-component via the `/ssr` entry and serves the compiled package so it hydrates in the browser —
-a working reference for how to consume the library in an SSR site.
+The demo is **HTML-first**: [demo/index.html](demo/index.html) authors the components as plain
+custom-element tags (`<kora-header>`, `<kora-button label="…">`, …) that render themselves
+client-side once `/lib/index.js` registers them — the "drop the tags into any HTML page" path.
+`demo/server.mjs` is just a static file server. (SSR via the `/ssr` `renderKora*` functions is also
+supported and tested — it's the other consumption path, not what the demo uses.)

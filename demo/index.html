@@ -1,0 +1,161 @@
+<!doctype html>
+<!--
+  HTML-first demo: the Kora components are authored as plain custom-element tags and render
+  themselves client-side once /lib/index.js registers them. No server-side rendering here — this is
+  the "drop the tags into any HTML page" consumption path. (SSR is also supported; see /ssr.)
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kora Site Resources — demo</title>
+
+    <!-- The handle-resolution adapter imports the bare specifier "cborg"; map it for native ESM.
+         (Sites with a bundler don't need this — their bundler resolves it.) -->
+    <script type="importmap">
+        { "imports": { "cborg": "/node_modules/cborg/cborg.js" } }
+    </script>
+
+    <link rel="stylesheet" href="/demo.css" />
+</head>
+<body>
+    <kora-background></kora-background>
+
+    <kora-header brand-label="handle" brand-href="/">
+        <a href="https://mint.handle.me" target="_blank" rel="noopener">Mint</a>
+        <a href="https://hal.handle.me" target="_blank" rel="noopener">H.A.L.</a>
+        <a href="https://merch.handle.me" target="_blank" rel="noopener">Merch</a>
+        <kora-wallet-button slot="actions"></kora-wallet-button>
+        <kora-menu slot="actions"></kora-menu>
+    </kora-header>
+
+    <main class="demo-main">
+        <section class="kora-glass kora-glass--xl kora-glass--glow demo-hero">
+            <h1>One design language. Every site.</h1>
+            <p>Framework-agnostic header, footer, wallet UX, and aero/glass — authored as plain HTML tags, rendered by vanilla custom elements.</p>
+            <kora-button label="Mint a Handle" variant="primary"></kora-button>
+        </section>
+
+        <section class="demo-cards">
+            <div class="kora-glass demo-card"><h3>Header</h3><p>Configurable $handle branding, swappable per site to $H.A.L.</p></div>
+            <div class="kora-glass demo-card"><h3>Wallet</h3><p>The chosen-handle indicator — click it (top right) to open the drawer.</p></div>
+            <div class="kora-glass demo-card"><h3>Aero / Glass</h3><p>These very panels: the frosted recipe from hal.handle.me.</p></div>
+        </section>
+
+        <section class="kora-glass demo-components">
+            <h2>Common components</h2>
+
+            <kora-tabs tabs='[{"id":"a","label":"Overview"},{"id":"b","label":"Details"},{"id":"c","label":"More"}]'></kora-tabs>
+
+            <div class="demo-row">
+                <kora-input label="Handle" placeholder="your handle"></kora-input>
+                <kora-select placeholder="Network" options='[{"value":"mainnet","label":"Mainnet"},{"value":"preview","label":"Preview"},{"value":"preprod","label":"Preprod"}]'></kora-select>
+            </div>
+
+            <div class="demo-row demo-row--center">
+                <kora-checkbox label="I agree" checked></kora-checkbox>
+                <kora-switch label="Notifications" checked></kora-switch>
+                <kora-radio name="plan" value="free" label="Free" checked></kora-radio>
+                <kora-radio name="plan" value="pro" label="Pro"></kora-radio>
+                <kora-tooltip text="This is a tooltip" position="top"><span class="demo-help">?</span></kora-tooltip>
+                <kora-loader size="28"></kora-loader>
+            </div>
+
+            <div class="demo-row demo-row--center">
+                <kora-button label="Open dialog" variant="primary"></kora-button>
+                <kora-button label="Success toast" variant="secondary"></kora-button>
+                <kora-button label="Error toast" variant="outline"></kora-button>
+            </div>
+
+            <kora-collapsible title="What is a Handle?">
+                <p>An Ada Handle is an NFT that doubles as your wallet address and identity across the ecosystem.</p>
+            </kora-collapsible>
+        </section>
+    </main>
+
+    <kora-footer>
+        <a href="https://docs.handle.me/docs/Handles/4_Resolution#handle_resolution_overview" target="_blank" rel="noopener">How to Integrate</a>
+        <a href="https://handle.me/$/tou">Terms of use</a>
+        <a href="https://handle.me/#verified_integration">Verified integration</a>
+        <button type="button">Clear site data</button>
+    </kora-footer>
+
+    <kora-drawer title="Wallet &amp; Handles">
+        <kora-wallet-panel></kora-wallet-panel>
+    </kora-drawer>
+
+    <kora-modal title="Example dialog">
+        <p>This is a kora-modal — the shared dialog shell. Close it with the ✕, the backdrop, or Escape.</p>
+    </kora-modal>
+
+    <!-- Register all custom elements. -->
+    <script type="module" src="/lib/index.js"></script>
+
+    <!-- Interactivity: wallet connect/auto-reconnect, handle resolution, and the drawer/modal/toast wiring. -->
+    <script type="module">
+        import {
+            clearHandleSiteData, walletStore, rememberHandle, recallHandle,
+            fetchWalletHandles, HANDLE_POLICY_DEMI, koraToast,
+        } from "/lib/index.js";
+        import { resolveWalletHandles, chooseDefaultHandle } from "/lib/wallet/handles.js";
+
+        const walletBtn = document.querySelector("kora-wallet-button");
+        const panel = document.querySelector("kora-wallet-panel");
+        const drawer = document.querySelector("kora-drawer");
+
+        // On connect, fetch the full handle list (incl. virtual SubHandles) from the Handle API; fall
+        // back to the trustless on-chain CBOR resolver if the API is unreachable. Prefer the
+        // last-remembered handle as the default.
+        async function loadHandles(s) {
+            let items;
+            try {
+                const api = await fetchWalletHandles(s.rewardAddressHex);
+                items = api.map((h) => ({
+                    name: h.name,
+                    virtual: h.handle_type === "virtual_subhandle",
+                    isDeMi: h.policy === HANDLE_POLICY_DEMI,
+                }));
+            } catch {
+                items = resolveWalletHandles(s.balanceCbor).map((h) => ({
+                    name: h.name, isDeMi: h.isDeMi, virtual: h.name.includes("@"),
+                }));
+            }
+            const firstRegular = items.find((i) => !i.virtual && !i.name.includes("@"))?.name;
+            const chosen = chooseDefaultHandle(items, recallHandle() ?? firstRegular);
+            if (panel) { panel.handles = items; panel.selected = chosen; }
+            if (chosen) walletBtn?.setAttribute("handle", chosen);
+            else walletBtn?.removeAttribute("handle");
+        }
+
+        let loadedFor = null;
+        walletStore.subscribe((s) => {
+            if (s.status === "connected") {
+                if (loadedFor !== s.rewardAddressHex) { loadedFor = s.rewardAddressHex; loadHandles(s); }
+            } else {
+                loadedFor = null;
+                walletBtn?.removeAttribute("handle");
+                if (panel) { panel.handles = []; panel.selected = null; }
+            }
+        });
+
+        panel?.addEventListener("kora-handle-select", (e) => {
+            walletBtn?.setAttribute("handle", e.detail.name);
+            rememberHandle(e.detail.name);
+        });
+        panel?.addEventListener("kora-disconnect", () => drawer?.removeAttribute("open"));
+
+        document.addEventListener("click", (e) => {
+            if (e.target.closest("kora-handle-indicator")) drawer?.setAttribute("open", "");
+            const link = e.target.closest(".kora-footer__link");
+            if (link && link.tagName === "BUTTON" && link.textContent === "Clear site data") clearHandleSiteData();
+            const label = e.target.closest("kora-button")?.getAttribute("label");
+            if (label === "Open dialog") document.querySelector("kora-modal")?.setAttribute("open", "");
+            else if (label === "Success toast") koraToast.success("Minted!", { message: "Transaction submitted." });
+            else if (label === "Error toast") koraToast.error("Something went wrong", { message: "Please try again." });
+        });
+
+        // Silently reconnect the previously-used wallet (no prompt on a first-ever visit).
+        walletStore.autoConnect();
+    </script>
+</body>
+</html>

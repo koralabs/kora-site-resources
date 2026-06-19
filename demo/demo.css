@@ -1,0 +1,114 @@
+/* Pull in the package styles (layers first so the cascade order is declared), then component CSS. */
+@import url("/lib/styles/layers.css");
+@import url("/lib/styles/reset.css");
+@import url("/lib/tokens/tokens.css");
+@import url("/lib/styles/glass.css");
+@import url("/lib/styles/utilities.css");
+@import url("/lib/components/primitives/kora-button/kora-button.css");
+@import url("/lib/components/chrome/kora-brand/kora-brand.css");
+@import url("/lib/components/chrome/kora-background/kora-background.css");
+@import url("/lib/components/chrome/kora-header/kora-header.css");
+@import url("/lib/components/chrome/kora-footer/kora-footer.css");
+@import url("/lib/components/chrome/kora-menu/kora-menu.css");
+@import url("/lib/components/wallet/kora-handle-indicator/kora-handle-indicator.css");
+@import url("/lib/components/wallet/kora-wallet-button/kora-wallet-button.css");
+@import url("/lib/components/wallet/kora-wallet-panel/kora-wallet-panel.css");
+@import url("/lib/components/overlay/kora-drawer/kora-drawer.css");
+@import url("/lib/components/overlay/kora-modal/kora-modal.css");
+@import url("/lib/components/feedback/kora-loader/kora-loader.css");
+@import url("/lib/components/feedback/kora-tooltip/kora-tooltip.css");
+@import url("/lib/components/feedback/kora-toast/kora-toast.css");
+@import url("/lib/components/forms/kora-checkbox/kora-checkbox.css");
+@import url("/lib/components/forms/kora-radio/kora-radio.css");
+@import url("/lib/components/forms/kora-switch/kora-switch.css");
+@import url("/lib/components/forms/kora-input/kora-input.css");
+@import url("/lib/components/forms/kora-select/kora-select.css");
+@import url("/lib/components/navigation/kora-tabs/kora-tabs.css");
+@import url("/lib/components/navigation/kora-collapsible/kora-collapsible.css");
+
+/* Demo-only layout. */
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--kora-color-text);
+    font-family: var(--kora-font-sans);
+}
+.demo-main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--kora-space-8) var(--kora-space-4);
+    display: grid;
+    gap: var(--kora-space-8);
+}
+.demo-hero {
+    padding: var(--kora-space-8);
+    text-align: center;
+}
+.demo-hero h1 {
+    font-size: 2.5rem;
+    margin: 0 0 var(--kora-space-3);
+}
+.demo-hero p {
+    color: var(--kora-gray-300);
+    margin: 0 0 var(--kora-space-6);
+}
+.demo-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--kora-space-4);
+}
+.demo-card {
+    padding: var(--kora-space-6);
+}
+.demo-card h3 {
+    margin: 0 0 var(--kora-space-2);
+    color: var(--kora-color-cyan);
+}
+.demo-card p {
+    margin: 0;
+    color: var(--kora-gray-300);
+    font-size: var(--kora-text-sm);
+}
+.demo-components {
+    padding: var(--kora-space-8);
+    display: grid;
+    gap: var(--kora-space-6);
+}
+.demo-components h2 {
+    margin: 0;
+}
+/* flex-end so the input's field box lines up with the (label-less) select box. */
+.demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--kora-space-4);
+    align-items: flex-end;
+}
+.demo-row--center {
+    align-items: center;
+}
+.demo-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--kora-surface-2);
+    cursor: help;
+}
+/* Wallet drawer panel demo bits. */
+.demo-profile {
+    padding: var(--kora-space-4);
+    margin-bottom: var(--kora-space-4);
+}
+.demo-profile__name {
+    margin: 0;
+    font-weight: 700;
+}
+.demo-profile__addr {
+    margin: var(--kora-space-1) 0 0;
+    font-family: var(--kora-font-mono);
+    font-size: var(--kora-text-sm);
+    color: var(--kora-drawer-ink-muted);
+}

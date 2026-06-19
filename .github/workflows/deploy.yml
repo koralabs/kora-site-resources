@@ -35,7 +35,22 @@ jobs:
             - name: Build
               run: npm run build
 
+            # Only publish when package.json's version isn't already on npm, so demo/docs/CI commits
+            # (which don't bump the version) don't fail the run trying to republish.
+            - name: Check version
+              id: ver
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  if npm view "@koralabs/kora-site-resources@${VERSION}" version >/dev/null 2>&1; then
+                      echo "publish=false" >> "$GITHUB_OUTPUT"
+                      echo "Version ${VERSION} already published — skipping publish."
+                  else
+                      echo "publish=true" >> "$GITHUB_OUTPUT"
+                      echo "Version ${VERSION} is new — will publish."
+                  fi
+
             # npm publish via OIDC trusted publishing. tsc emits to lib/ (with CSS copied in);
             # publish from there with package.json + README copied in (main=index.js -> lib/index.js).
             - name: Publish to npm
+              if: steps.ver.outputs.publish == 'true'
               run: cp package.json README.md ./lib/ && cd ./lib && npm publish --provenance --access public
