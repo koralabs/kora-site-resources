@@ -1,0 +1,11 @@
+/* Minimal, opt-in reset for Kora custom elements. Scoped to kora-* hosts so it never touches
+ * the consuming app's own markup. Lives in the lowest layer so anything can override it. */
+@layer kora.reset {
+    :where([class^="kora-"], [class*=" kora-"]) {
+        box-sizing: border-box;
+    }
+
+    :where(kora-button, kora-header, kora-footer) {
+        font-family: var(--kora-font-sans);
+    }
+}

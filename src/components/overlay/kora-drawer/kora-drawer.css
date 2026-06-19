@@ -1,0 +1,88 @@
+@layer kora.components {
+    kora-drawer {
+        position: fixed;
+        inset: 0;
+        z-index: var(--kora-z-drawer);
+        display: block;
+        pointer-events: none; /* let clicks pass through when closed */
+    }
+
+    .kora-drawer__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(var(--kora-glass-blur-sm));
+        -webkit-backdrop-filter: blur(var(--kora-glass-blur-sm));
+        opacity: 0;
+        transition: opacity var(--kora-duration-base) var(--kora-ease-out);
+    }
+
+    .kora-drawer__panel {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        max-width: 28rem;
+        background: var(--kora-drawer-bg-900);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: translateX(100%);
+        transition: transform var(--kora-duration-base) var(--kora-ease-out);
+    }
+
+    /* Open state — driven by the host attribute. */
+    kora-drawer[open] {
+        pointer-events: auto;
+    }
+    kora-drawer[open] .kora-drawer__backdrop {
+        opacity: 1;
+    }
+    kora-drawer[open] .kora-drawer__panel {
+        transform: translateX(0);
+    }
+
+    .kora-drawer__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--kora-space-4) var(--kora-space-6);
+        border-bottom: 1px solid var(--kora-drawer-line);
+    }
+
+    .kora-drawer__title {
+        margin: 0;
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-lg);
+        font-weight: 600;
+        color: var(--kora-drawer-ink);
+    }
+
+    .kora-drawer__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.5rem;
+        line-height: 1;
+        background: none;
+        border: none;
+        border-radius: var(--kora-radius-md);
+        color: var(--kora-drawer-ink-muted);
+        cursor: pointer;
+        transition: color var(--kora-duration-fast) var(--kora-ease),
+            background-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-drawer__close:hover {
+        color: var(--kora-drawer-ink);
+        background: var(--kora-drawer-hover);
+    }
+
+    .kora-drawer__body {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--kora-space-6);
+    }
+}

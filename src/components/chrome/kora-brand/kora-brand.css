@@ -1,0 +1,23 @@
+@layer kora.components {
+    .kora-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        text-decoration: none;
+        line-height: 1;
+    }
+
+    .kora-brand__mark {
+        height: 2rem;
+        width: auto;
+        color: var(--kora-color-primary);
+        flex: none;
+    }
+
+    .kora-brand__label {
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-xl);
+        font-weight: var(--kora-font-weight-bold);
+        color: var(--kora-color-text);
+    }
+}

@@ -1,0 +1,82 @@
+@layer kora.components {
+    .kora-wallet {
+        position: relative;
+        display: inline-block;
+    }
+
+    .kora-wallet__connect {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--kora-space-2);
+        padding: 6px var(--kora-space-4);
+        background: var(--kora-surface-1);
+        color: var(--kora-color-text);
+        border: 1px solid var(--kora-color-border);
+        border-radius: var(--kora-radius-pill);
+        font-family: var(--kora-font-sans);
+        font-weight: var(--kora-font-weight-medium);
+        cursor: pointer;
+        transition: background-color var(--kora-duration-base) var(--kora-ease);
+    }
+
+    .kora-wallet__connect:hover {
+        background: var(--kora-surface-2);
+    }
+
+    .kora-wallet__connect:disabled {
+        opacity: 0.6;
+        cursor: progress;
+    }
+
+    /* Our `display` rule above would otherwise override the [hidden] attribute we toggle in JS. */
+    .kora-wallet__connect[hidden] {
+        display: none;
+    }
+
+    .kora-wallet__picker {
+        position: absolute;
+        top: calc(100% + var(--kora-space-2));
+        right: 0;
+        min-width: 12rem;
+        padding: var(--kora-space-2);
+        background: var(--kora-color-surface-raised);
+        border: 1px solid var(--kora-color-border);
+        border-radius: var(--kora-radius-lg);
+        box-shadow: var(--kora-glass-shadow);
+        z-index: var(--kora-z-header);
+    }
+
+    .kora-wallet__option {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-2);
+        width: 100%;
+        padding: var(--kora-space-2) var(--kora-space-3);
+        background: none;
+        border: none;
+        border-radius: var(--kora-radius-md);
+        color: var(--kora-color-text);
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-sm);
+        text-align: left;
+        cursor: pointer;
+        transition: background-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-wallet__option:hover {
+        background: var(--kora-surface-2);
+    }
+
+    .kora-wallet__icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: var(--kora-radius-sm);
+    }
+
+    .kora-wallet__empty {
+        margin: 0;
+        padding: var(--kora-space-2) var(--kora-space-3);
+        color: var(--kora-color-text-muted);
+        font-size: var(--kora-text-sm);
+    }
+}

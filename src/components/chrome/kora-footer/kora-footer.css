@@ -1,0 +1,34 @@
+@layer kora.components {
+    .kora-footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: var(--kora-space-3);
+        padding: var(--kora-space-8) var(--kora-space-4);
+        text-align: center;
+    }
+
+    .kora-footer__link {
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-sm);
+        color: var(--kora-color-text-muted);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color var(--kora-duration-base) var(--kora-ease);
+    }
+
+    .kora-footer__link:hover {
+        color: var(--kora-gray-300);
+    }
+
+    /* Pipe dividers between items, drawn purely in CSS. */
+    .kora-footer__link:not(:first-child)::before {
+        content: "|";
+        color: var(--kora-slate-600);
+        margin-right: var(--kora-space-3);
+    }
+}

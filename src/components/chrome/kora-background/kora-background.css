@@ -1,0 +1,68 @@
+@layer kora.components {
+    kora-background {
+        position: fixed;
+        inset: 0;
+        z-index: var(--kora-z-background);
+        pointer-events: none;
+        display: block;
+    }
+
+    .kora-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: var(--kora-color-bg);
+    }
+
+    /* App-provided grid texture via --kora-bg-grid-image. Hidden unless the host has `grid`. */
+    .kora-bg__grid {
+        position: absolute;
+        inset: 0;
+        background-image: var(--kora-bg-grid-image, none);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 0.5;
+    }
+
+    kora-background:not([grid]) .kora-bg__grid {
+        display: none;
+    }
+
+    /* Top-down gradient veil (hal's animated overlay, settled state). */
+    .kora-bg__gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.9),
+            rgba(11, 19, 43, 0.8),
+            transparent
+        );
+    }
+
+    /* Soft blurred accent blobs. */
+    .kora-bg__blob {
+        position: absolute;
+        border-radius: var(--kora-radius-pill);
+        filter: blur(64px);
+        opacity: 0.05;
+    }
+
+    .kora-bg__blob--cyan {
+        top: -2.5rem;
+        left: -2.5rem;
+        width: 20rem;
+        height: 20rem;
+        background: var(--kora-color-cyan);
+    }
+
+    .kora-bg__blob--green {
+        bottom: 0;
+        right: 0;
+        width: 22rem;
+        height: 22rem;
+        background: var(--kora-color-primary);
+    }
+}

@@ -1,0 +1,54 @@
+@layer kora.components {
+    kora-header {
+        display: block;
+        position: relative;
+        z-index: var(--kora-z-header);
+    }
+
+    .kora-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--kora-space-4);
+        width: 100%;
+        padding: var(--kora-space-4);
+    }
+
+    .kora-header__start {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-8);
+    }
+
+    .kora-header__nav {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-6);
+    }
+
+    .kora-header__nav > a {
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-sm);
+        font-weight: var(--kora-font-weight-medium);
+        color: var(--kora-gray-300);
+        text-decoration: none;
+        transition: color var(--kora-duration-base) var(--kora-ease);
+    }
+
+    .kora-header__nav > a:hover {
+        color: var(--kora-color-text);
+    }
+
+    .kora-header__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-2);
+        margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+        .kora-header__nav {
+            display: none;
+        }
+    }
+}

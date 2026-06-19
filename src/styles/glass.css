@@ -1,0 +1,56 @@
+/*
+ * Aero / glass (glassmorphism) utilities — distilled from hal.handle.me's frosted panels.
+ * Token-driven so they re-theme automatically. Apply to your own markup:
+ *
+ *   <section class="kora-glass">…</section>
+ *   <div class="kora-glass kora-glass--strong">…</div>
+ *
+ * `.kora-glass` is the standard panel (subtle); modifiers tune blur/opacity. The optional
+ * `.kora-glass--glow` adds the cyan→green outer-glow border seen on the minting dashboard.
+ */
+@layer kora.components {
+    .kora-glass {
+        position: relative;
+        background: var(--kora-glass-bg-strong);
+        backdrop-filter: blur(var(--kora-glass-blur-md));
+        -webkit-backdrop-filter: blur(var(--kora-glass-blur-md));
+        border: 1px solid var(--kora-glass-border);
+        border-radius: var(--kora-radius-xl);
+        box-shadow: var(--kora-glass-shadow);
+    }
+
+    /* Heaviest blur + most translucent — the hero dashboard treatment. */
+    .kora-glass--xl {
+        background: var(--kora-glass-bg);
+        backdrop-filter: blur(var(--kora-glass-blur));
+        -webkit-backdrop-filter: blur(var(--kora-glass-blur));
+    }
+
+    /* Tinted-ink variant (black @ 30%) for large content panels. */
+    .kora-glass--ink {
+        background: var(--kora-glass-bg-ink);
+    }
+
+    /* Minimal blur for small cards (phase cards). */
+    .kora-glass--subtle {
+        backdrop-filter: blur(var(--kora-glass-blur-sm));
+        -webkit-backdrop-filter: blur(var(--kora-glass-blur-sm));
+        box-shadow: none;
+    }
+
+    /* Cyan→green outer glow. Pair with a `position: relative` parent. */
+    .kora-glass--glow::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background: linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--kora-color-cyan) 20%, transparent),
+            color-mix(in srgb, var(--kora-color-primary) 20%, transparent),
+            color-mix(in srgb, var(--kora-color-cyan) 20%, transparent)
+        );
+        filter: blur(var(--kora-glass-blur));
+    }
+}

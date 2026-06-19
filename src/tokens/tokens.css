@@ -1,0 +1,113 @@
+/*
+ * Kora / Ada Handle design tokens — the single source of truth for theming.
+ *
+ * Tokens are CSS custom properties: they inherit through ANY boundary (light or shadow DOM),
+ * so theming is identical everywhere. Values reconciled from the live sites' Tailwind palettes
+ * (handle.me + hal.handle.me): dark-navy surfaces, brand green, cyan/blue accents, the glass
+ * border, and the side-drawer palette.
+ *
+ * Layered under `kora.tokens` (see styles/layers.css) so apps can override predictably without
+ * specificity wars. Switch brand/mode by overriding the SEMANTIC tokens on a wrapper element.
+ */
+@layer kora.tokens {
+    :root {
+        /* ---- color primitives ---- */
+        --kora-green-500: #0cd15b; /* brand green (primary-200 / logo mark) */
+        --kora-green-400: #0ddd61;
+        --kora-cyan-500: #48acf0; /* primary-100 */
+        --kora-blue-500: #4da6ff;
+        --kora-blue-400: #70b8ff;
+        --kora-blue-600: #3d85cc; /* brand-400 */
+
+        --kora-navy-950: #0a0e3b; /* brand-600 — deepest surface */
+        --kora-navy-900: #0b132b; /* dark-100 / brand-900 — body background */
+        --kora-navy-800: #1c2541; /* dark-200 */
+        --kora-navy-700: #223d73; /* dark-225 — glass border */
+        --kora-navy-600: #285394; /* dark-250 */
+        --kora-slate-600: #3a506b; /* dark-300 */
+        --kora-slate-500: #56779f; /* dark-350 */
+
+        --kora-red-500: #e23f5c;
+        --kora-white: #ffffff;
+        --kora-gray-300: #9d9fb1;
+        --kora-gray-400: #6b7280;
+        --kora-gray-500: #535676;
+
+        /* side-drawer palette (handle.me) */
+        --kora-drawer-bg-900: #0f1419;
+        --kora-drawer-card: #1a1f26;
+        --kora-drawer-hover: #22282f;
+        --kora-drawer-line: #2a3441;
+        --kora-drawer-blue: #1d9bf0;
+        --kora-drawer-blue-hover: #1a8cd8;
+        --kora-drawer-ink: #e7e9ea;
+        --kora-drawer-ink-muted: #71767b;
+
+        /* ---- semantic tokens (what components reference) ---- */
+        --kora-color-bg: var(--kora-navy-900);
+        --kora-color-surface: var(--kora-navy-950);
+        --kora-color-surface-raised: var(--kora-navy-800);
+        --kora-color-text: var(--kora-white);
+        --kora-color-text-muted: var(--kora-gray-400);
+        --kora-color-text-disabled: var(--kora-gray-500);
+        --kora-color-primary: var(--kora-green-500);
+        --kora-color-primary-contrast: var(--kora-navy-950);
+        --kora-color-accent: var(--kora-blue-500);
+        --kora-color-cyan: var(--kora-cyan-500);
+        --kora-color-danger: var(--kora-red-500);
+        --kora-color-border: var(--kora-navy-700);
+
+        --kora-overlay: rgba(0, 0, 0, 0.5);
+        --kora-surface-1: rgba(255, 255, 255, 0.05);
+        --kora-surface-2: rgba(255, 255, 255, 0.1);
+        --kora-surface-3: rgba(255, 255, 255, 0.15);
+
+        /* ---- glass / aero (hal.handle.me) ---- */
+        --kora-glass-bg: rgba(11, 19, 43, 0.2); /* dark-100 @ 20% */
+        --kora-glass-bg-strong: rgba(11, 19, 43, 0.4); /* dark-100 @ 40% */
+        --kora-glass-bg-ink: rgba(0, 0, 0, 0.3); /* black @ 30% */
+        --kora-glass-border: rgba(34, 61, 115, 0.5); /* navy-700 @ 50% */
+        --kora-glass-blur: 30px;
+        --kora-glass-blur-md: 12px;
+        --kora-glass-blur-sm: 4px;
+        --kora-glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+        /* ---- radius ---- */
+        --kora-radius-sm: 4px;
+        --kora-radius-md: 8px;
+        --kora-radius-lg: 12px;
+        --kora-radius-xl: 16px;
+        --kora-radius-pill: 999px;
+
+        /* ---- spacing ---- */
+        --kora-space-1: 4px;
+        --kora-space-2: 8px;
+        --kora-space-3: 12px;
+        --kora-space-4: 16px;
+        --kora-space-6: 24px;
+        --kora-space-8: 32px;
+
+        /* ---- typography ---- */
+        --kora-font-sans: "Syne", "Noto Sans", ui-sans-serif, system-ui, -apple-system,
+            "Segoe UI", Roboto, sans-serif;
+        --kora-font-mono: "Ubuntu Mono", ui-monospace, monospace;
+        --kora-text-sm: 0.875rem;
+        --kora-text-md: 1rem;
+        --kora-text-lg: 1.25rem;
+        --kora-text-xl: 1.875rem; /* ~30px brand wordmark */
+        --kora-font-weight-medium: 500;
+        --kora-font-weight-bold: 700;
+
+        /* ---- motion ---- */
+        --kora-duration-fast: 150ms;
+        --kora-duration-base: 250ms;
+        --kora-duration-slow: 600ms;
+        --kora-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --kora-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+        /* ---- z-index ---- */
+        --kora-z-background: -1;
+        --kora-z-header: 40;
+        --kora-z-drawer: 50;
+    }
+}

@@ -1,0 +1,70 @@
+@layer kora.components {
+    kora-button {
+        display: inline-block;
+    }
+
+    .kora-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--kora-space-2);
+        padding: var(--kora-space-2) var(--kora-space-4);
+        border: 1px solid transparent;
+        border-radius: var(--kora-radius-md);
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-md);
+        font-weight: var(--kora-font-weight-bold);
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color var(--kora-duration-fast) var(--kora-ease),
+            border-color var(--kora-duration-fast) var(--kora-ease),
+            opacity var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .kora-btn--primary {
+        background: var(--kora-color-primary);
+        color: var(--kora-color-primary-contrast);
+    }
+
+    .kora-btn--secondary {
+        background: var(--kora-color-accent);
+        color: var(--kora-color-primary-contrast);
+    }
+
+    .kora-btn--tertiary {
+        background: var(--kora-surface-2);
+        color: var(--kora-color-text);
+    }
+
+    .kora-btn--outline {
+        background: transparent;
+        border-color: var(--kora-color-border);
+        color: var(--kora-color-text);
+    }
+
+    .kora-btn--link {
+        background: transparent;
+        color: var(--kora-color-accent);
+        padding: 0;
+    }
+
+    .kora-btn__spinner {
+        display: inline-flex;
+        animation: kora-spin 0.8s linear infinite;
+    }
+
+    .kora-btn__spinner[hidden] {
+        display: none;
+    }
+
+    @keyframes kora-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}

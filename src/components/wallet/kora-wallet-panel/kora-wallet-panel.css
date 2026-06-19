@@ -1,0 +1,203 @@
+@layer kora.components {
+    .kora-wallet-panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--kora-space-6);
+    }
+
+    .kora-wallet-panel__profile {
+        padding: var(--kora-space-6);
+    }
+
+    .kora-wallet-panel__head {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-3);
+        margin-bottom: var(--kora-space-4);
+    }
+
+    .kora-wallet-panel__avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        flex: none;
+        border-radius: var(--kora-radius-lg);
+        background: linear-gradient(135deg, var(--kora-color-accent), var(--kora-color-primary));
+        color: var(--kora-color-primary-contrast);
+        font-weight: var(--kora-font-weight-bold);
+        font-size: var(--kora-text-lg);
+    }
+
+    .kora-wallet-panel__id {
+        min-width: 0;
+        margin-right: auto;
+    }
+
+    .kora-wallet-panel__handle {
+        margin: 0;
+        font-weight: 600;
+        color: var(--kora-drawer-ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .kora-wallet-panel__dollar {
+        color: var(--kora-green-400);
+    }
+
+    .kora-wallet-panel__addr {
+        margin: 2px 0 0;
+        font-family: var(--kora-font-mono);
+        font-size: var(--kora-text-sm);
+        color: var(--kora-drawer-ink-muted);
+    }
+
+    .kora-wallet-panel__tools {
+        display: flex;
+        gap: var(--kora-space-1);
+    }
+
+    .kora-wallet-panel__tool {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        background: none;
+        border: none;
+        border-radius: var(--kora-radius-md);
+        color: var(--kora-drawer-ink-muted);
+        cursor: pointer;
+        transition: color var(--kora-duration-fast) var(--kora-ease), background-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-wallet-panel__tool:hover {
+        color: var(--kora-drawer-ink);
+        background: var(--kora-drawer-hover);
+    }
+
+    .kora-wallet-panel__tool--danger:hover {
+        color: var(--kora-color-danger);
+    }
+
+    .kora-wallet-panel__portal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--kora-space-2);
+        width: 100%;
+        padding: 10px var(--kora-space-4);
+        margin-bottom: var(--kora-space-3);
+        background: var(--kora-drawer-blue);
+        color: var(--kora-white);
+        font-weight: var(--kora-font-weight-medium);
+        text-decoration: none;
+        border-radius: var(--kora-radius-lg);
+        transition: background-color var(--kora-duration-base) var(--kora-ease);
+    }
+
+    .kora-wallet-panel__portal:hover {
+        background: var(--kora-drawer-blue-hover);
+    }
+
+    .kora-wallet-panel__quick {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--kora-space-2);
+    }
+
+    .kora-wallet-panel__quick-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--kora-space-2) var(--kora-space-3);
+        background: var(--kora-surface-1);
+        color: var(--kora-drawer-ink-muted);
+        font-size: var(--kora-text-sm);
+        text-decoration: none;
+        border-radius: var(--kora-radius-md);
+        transition: background-color var(--kora-duration-fast) var(--kora-ease), color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-wallet-panel__quick-link:hover {
+        background: var(--kora-drawer-hover);
+        color: var(--kora-drawer-ink);
+    }
+
+    .kora-wallet-panel__search-input {
+        width: 100%;
+        padding: 10px var(--kora-space-4);
+        background: var(--kora-drawer-card);
+        border: 1px solid var(--kora-drawer-line);
+        border-radius: var(--kora-radius-lg);
+        color: var(--kora-drawer-ink);
+        font-family: var(--kora-font-sans);
+        transition: border-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-wallet-panel__search-input::placeholder {
+        color: var(--kora-drawer-ink-muted);
+    }
+
+    .kora-wallet-panel__search-input:focus {
+        outline: none;
+        border-color: var(--kora-drawer-blue);
+    }
+
+    .kora-wallet-panel__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--kora-space-2);
+    }
+
+    .kora-wallet-panel__row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--kora-space-3) var(--kora-space-4);
+        background: var(--kora-drawer-card);
+        border: 1px solid var(--kora-drawer-line);
+        border-radius: var(--kora-radius-lg);
+        color: var(--kora-drawer-ink);
+        font-weight: var(--kora-font-weight-medium);
+        cursor: pointer;
+        text-align: left;
+        transition: background-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-wallet-panel__row:hover {
+        background: var(--kora-drawer-hover);
+    }
+
+    .kora-wallet-panel__row.is-selected {
+        background: var(--kora-drawer-blue);
+        border-color: transparent;
+    }
+
+    .kora-wallet-panel__row-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .kora-wallet-panel__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        flex: none;
+        font-size: 0.625rem;
+        color: var(--kora-green-400);
+    }
+
+    .kora-wallet-panel__empty {
+        margin: 0;
+        padding: var(--kora-space-4);
+        text-align: center;
+        color: var(--kora-drawer-ink-muted);
+        font-size: var(--kora-text-sm);
+    }
+}

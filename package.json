@@ -1,0 +1,85 @@
+{
+    "name": "@koralabs/kora-site-resources",
+    "version": "0.0.1",
+    "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
+    "type": "module",
+    "license": "ISC",
+    "homepage": "https://github.com/koralabs/kora-site-resources",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/koralabs/kora-site-resources.git"
+    },
+    "main": "lib/index.js",
+    "module": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "sideEffects": [
+        "./lib/components/**/index.js",
+        "*.css"
+    ],
+    "files": [
+        "lib"
+    ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+        },
+        "./ssr": {
+            "types": "./lib/ssr/index.d.ts",
+            "default": "./lib/ssr/index.js"
+        },
+        "./base": {
+            "types": "./lib/components/base/kora-element.d.ts",
+            "default": "./lib/components/base/kora-element.js"
+        },
+        "./env": {
+            "types": "./lib/env/index.d.ts",
+            "default": "./lib/env/index.js"
+        },
+        "./wallet": {
+            "types": "./lib/wallet/index.d.ts",
+            "default": "./lib/wallet/index.js"
+        },
+        "./wallet/handles": {
+            "types": "./lib/wallet/handles.d.ts",
+            "default": "./lib/wallet/handles.js"
+        },
+        "./wallet/handle-api": {
+            "types": "./lib/wallet/handle-api.d.ts",
+            "default": "./lib/wallet/handle-api.js"
+        },
+        "./tokens": {
+            "types": "./lib/tokens/index.d.ts",
+            "default": "./lib/tokens/index.js"
+        },
+        "./tokens.css": "./lib/tokens/tokens.css",
+        "./styles/layers.css": "./lib/styles/layers.css",
+        "./styles/reset.css": "./lib/styles/reset.css",
+        "./components/*": {
+            "types": "./lib/components/*/index.d.ts",
+            "default": "./lib/components/*/index.js"
+        },
+        "./components/*.css": "./lib/components/*.css"
+    },
+    "scripts": {
+        "build": "tsc && node scripts/copy-assets.mjs",
+        "test": "npm run build && node --import ./test/setup.mjs --test \"test/*.test.mjs\"",
+        "demo": "npm run build && node demo/server.mjs",
+        "lint": "tsc --noEmit"
+    },
+    "dependencies": {
+        "cborg": "^5.1.1"
+    },
+    "peerDependencies": {
+        "@koralabs/kora-labs-common": ">=6.7.6"
+    },
+    "peerDependenciesMeta": {
+        "@koralabs/kora-labs-common": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "@happy-dom/global-registrator": "^20.10.6",
+        "typescript": "^5.5.3"
+    }
+}
