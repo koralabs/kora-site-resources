@@ -74,6 +74,6 @@ export function koraFooterLinks(opts: KoraLinkOptions = {}): KoraFooterLink[] {
         },
         { label: "Terms of use", href: siteUrl("portal", { ...opts, path: "/$/tou" }) },
         { label: "Verified integration", href: siteUrl("portal", { ...opts, path: "/#verified_integration" }) },
-        { label: "Clear site data" },
+        { label: "Clear site data", action: "clear-site-data" },
     ];
 }

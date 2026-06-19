@@ -29,7 +29,7 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `kora-brand` | handle.me logo | `$handle` default; `label` rebrands (e.g. `H.A.L.`) |
 | `kora-header` | handle.me | brand + slotted nav + `slot="actions"` |
 | `kora-menu` | handle.me | "Resources" hamburger; shared default links + site extras |
-| `kora-footer` | handle.me | slotted links, CSS pipe dividers |
+| `kora-footer` | handle.me | renders shared default links + appends site links; built-in Clear-site-data action; `default-links="false"` to opt out |
 | `kora-background` | hal.handle.me | dark gradient + optional grid + blur blobs |
 | `kora-handle-indicator` | handle.me | chosen-handle pill, emits `click` |
 | `kora-wallet-button` | handle.me | connect picker → connecting → connected indicator (WalletStore) |

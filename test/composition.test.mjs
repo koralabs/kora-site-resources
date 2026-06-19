@@ -57,21 +57,41 @@ test("renderKoraHeader embeds brand + default trio + site nav + actions", () => 
     assert.match(html, /data-kora-slot="actions"><span>x<\/span>/);
 });
 
-// Feature: footer projects authored link children into the centered row.
-test("kora-footer projects link children", async () => {
+// Feature: footer renders the shared default links by default, then appends authored children.
+test("kora-footer renders defaults then appends authored links", async () => {
     document.body.innerHTML = "";
     const el = document.createElement("kora-footer");
     const a = document.createElement("a");
-    a.href = "/terms";
-    a.textContent = "Terms";
+    a.href = "/about";
+    a.textContent = "About";
     el.append(a);
     document.body.appendChild(el);
     await tick();
-    assert.equal(el.querySelector(".kora-footer > a"), a);
 
-    // SSR convenience builds links from data.
-    const html = renderKoraFooter({ links: [{ label: "Docs", href: "/docs", external: true }] });
-    assert.match(html, /<a class="kora-footer__link" href="\/docs" target="_blank"/);
+    const labels = [...el.querySelectorAll(".kora-footer > a, .kora-footer > button")].map((n) => n.textContent);
+    assert.deepEqual(labels, ["How to Integrate", "Terms of use", "Verified integration", "Clear site data", "About"]);
+    assert.equal(el.querySelector(".kora-footer > a:last-of-type"), a); // site link appended last
+    // The clear-site-data default is a marked action button (wired by the component).
+    assert.ok(el.querySelector('[data-kora-action="clear-site-data"]'));
+});
+
+// Feature: default-links="false" omits the shared defaults (site provides the whole footer).
+test("kora-footer default-links=false omits the shared defaults", async () => {
+    document.body.innerHTML = "";
+    const el = document.createElement("kora-footer");
+    el.setAttribute("default-links", "false");
+    const a = document.createElement("a");
+    a.href = "/only";
+    a.textContent = "Only";
+    el.append(a);
+    document.body.appendChild(el);
+    await tick();
+    assert.deepEqual([...el.querySelectorAll(".kora-footer > a, .kora-footer > button")].map((n) => n.textContent), ["Only"]);
+
+    // SSR: defaults + appended extras.
+    const html = renderKoraFooter({ env: "mainnet", links: [{ label: "Docs", href: "/docs", external: true }] });
+    assert.match(html, />How to Integrate</); // default present
+    assert.match(html, /<a class="kora-footer__link" href="\/docs" target="_blank"/); // extra appended
 });
 
 // Feature: drawer toggles via the `open` property and emits kora-drawer-close on Escape.

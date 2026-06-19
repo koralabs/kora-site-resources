@@ -72,11 +72,10 @@
         </section>
     </main>
 
+    <!-- The shared default links (How to Integrate / Terms / Verified integration / Clear site data)
+         render automatically; author extra site links to append them. -->
     <kora-footer>
-        <a href="https://docs.handle.me/docs/Handles/4_Resolution#handle_resolution_overview" target="_blank" rel="noopener">How to Integrate</a>
-        <a href="https://handle.me/$/tou">Terms of use</a>
-        <a href="https://handle.me/#verified_integration">Verified integration</a>
-        <button type="button">Clear site data</button>
+        <a href="https://github.com/koralabs" target="_blank" rel="noopener">GitHub</a>
     </kora-footer>
 
     <kora-drawer title="Wallet &amp; Handles">
@@ -93,7 +92,7 @@
     <!-- Interactivity: wallet connect/auto-reconnect, handle resolution, and the drawer/modal/toast wiring. -->
     <script type="module">
         import {
-            clearHandleSiteData, walletStore, rememberHandle, recallHandle,
+            walletStore, rememberHandle, recallHandle,
             fetchWalletHandles, HANDLE_POLICY_DEMI, koraToast,
         } from "/lib/index.js";
         import { resolveWalletHandles, chooseDefaultHandle } from "/lib/wallet/handles.js";
@@ -146,8 +145,7 @@
 
         document.addEventListener("click", (e) => {
             if (e.target.closest("kora-handle-indicator")) drawer?.setAttribute("open", "");
-            const footerBtn = e.target.closest("kora-footer button");
-            if (footerBtn && footerBtn.textContent.trim() === "Clear site data") clearHandleSiteData();
+            // (The footer's "Clear site data" is wired by the kora-footer component itself.)
             const label = e.target.closest("kora-button")?.getAttribute("label");
             if (label === "Open dialog") document.querySelector("kora-modal")?.setAttribute("open", "");
             else if (label === "Success toast") koraToast.success("Minted!", { message: "Transaction submitted." });
