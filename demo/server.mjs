@@ -112,7 +112,8 @@ function page(env) {
         .demo-handle { padding: var(--kora-space-3) var(--kora-space-4); font-family: var(--kora-font-mono); }
         .demo-components { padding: var(--kora-space-8); display: grid; gap: var(--kora-space-6); }
         .demo-components h2 { margin: 0; }
-        .demo-row { display: flex; flex-wrap: wrap; gap: var(--kora-space-4); align-items: flex-start; }
+        /* flex-end so the input's field box lines up with the (label-less) select box. */
+        .demo-row { display: flex; flex-wrap: wrap; gap: var(--kora-space-4); align-items: flex-end; }
         .demo-row--center { align-items: center; }
         .demo-help { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--kora-surface-2); cursor: help; }
     </style>
