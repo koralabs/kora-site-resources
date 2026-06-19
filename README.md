@@ -33,7 +33,7 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `kora-background` | hal.handle.me | dark gradient + optional grid + blur blobs |
 | `kora-handle-indicator` | handle.me | chosen-handle pill, emits `click` |
 | `kora-wallet-button` | handle.me | connect picker → connecting → connected indicator (WalletStore) |
-| `kora-wallet-panel` | handle.me | drawer body: profile, View Portal/Personalize/SubHandles, search, handle list + badges |
+| `kora-wallet-panel` | handle.me | drawer body: profile, actions, search, handle list + badges. Fires `kora-handle-select` `{name, previous, source}` on any selection change (user or auto) |
 | `kora-drawer` | handle.me | opt-in slide-out panel, `open` attr, `kora-drawer-close` event |
 | `kora-modal` | handle.me | centered dialog shell (glass + gradient top border) |
 | `kora-loader` | handle.me | dual-ring spinner |

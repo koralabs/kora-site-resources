@@ -12,7 +12,13 @@ const short = (addr: string | null | undefined): string =>
 /**
  * <kora-wallet-panel> — the "Wallet & Handles" drawer body. Subscribes to a WalletStore for the
  * connected address; the app supplies the resolved handles (via `.handles`) and the active handle
- * (`.selected` / attribute). Emits `kora-handle-select`, `kora-disconnect`, `kora-settings`.
+ * (`.selected` / attribute).
+ *
+ * Events (all bubble + composed):
+ *   - `kora-handle-select` — fires on ANY change to the selected handle, whether a drawer click OR
+ *     a programmatic/auto selection (e.g. `panel.selected = …` on connect). Deduped to real
+ *     changes. detail: `{ name: string | null, previous: string | null, source: "user" | "programmatic" }`.
+ *   - `kora-disconnect`, `kora-settings`.
  */
 export class KoraWalletPanel extends KoraElement {
     static get observedAttributes(): string[] {
@@ -44,12 +50,23 @@ export class KoraWalletPanel extends KoraElement {
     }
 
     set selected(name: string | null) {
-        this.#selected = name;
-        this.#refreshProfile();
-        this.#renderList();
+        // Programmatic selection (app-driven, e.g. auto-select on connect) — emits like a user pick.
+        this.#applySelected(name, "programmatic");
     }
     get selected(): string | null {
         return this.#selected;
+    }
+
+    /** Update the selected handle and, on an actual change, fire `kora-handle-select`. `source` is
+     *  "user" for a drawer click or "programmatic" for an app/auto selection. */
+    #applySelected(name: string | null, source: "user" | "programmatic"): void {
+        const next = name ?? null;
+        if (next === this.#selected) return; // dedupe — only notify on a real change
+        const previous = this.#selected;
+        this.#selected = next;
+        this.#refreshProfile();
+        this.#renderList();
+        this.#emit("kora-handle-select", { name: next, previous, source });
     }
 
     protected override template(): string {
@@ -126,9 +143,7 @@ export class KoraWalletPanel extends KoraElement {
     #onListClick = (event: Event): void => {
         const row = (event.target as Element).closest<HTMLElement>(".kora-wallet-panel__row");
         const name = row?.dataset.name;
-        if (!name) return;
-        this.selected = name;
-        this.#emit("kora-handle-select", { name });
+        if (name) this.#applySelected(name, "user");
     };
 
     #onDisconnect = (): void => {

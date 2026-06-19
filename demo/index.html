@@ -121,9 +121,9 @@
             }
             const firstRegular = items.find((i) => !i.virtual && !i.name.includes("@"))?.name;
             const chosen = chooseDefaultHandle(items, recallHandle() ?? firstRegular);
+            // Setting handles + selected fires kora-handle-select (even for this auto-select), which
+            // the single listener below uses to update the header pill.
             if (panel) { panel.handles = items; panel.selected = chosen; }
-            if (chosen) walletBtn?.setAttribute("handle", chosen);
-            else walletBtn?.removeAttribute("handle");
         }
 
         let loadedFor = null;
@@ -132,14 +132,15 @@
                 if (loadedFor !== s.rewardAddressHex) { loadedFor = s.rewardAddressHex; loadHandles(s); }
             } else {
                 loadedFor = null;
-                walletBtn?.removeAttribute("handle");
-                if (panel) { panel.handles = []; panel.selected = null; }
+                if (panel) { panel.handles = []; panel.selected = null; } // → kora-handle-select(name:null)
             }
         });
 
+        // One place to react to the chosen handle changing — user pick OR auto-select.
         panel?.addEventListener("kora-handle-select", (e) => {
-            walletBtn?.setAttribute("handle", e.detail.name);
-            rememberHandle(e.detail.name);
+            if (e.detail.name) walletBtn?.setAttribute("handle", e.detail.name);
+            else walletBtn?.removeAttribute("handle");
+            if (e.detail.source === "user") rememberHandle(e.detail.name); // remember explicit choices only
         });
         panel?.addEventListener("kora-disconnect", () => drawer?.removeAttribute("open"));
 

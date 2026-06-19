@@ -82,16 +82,42 @@ test("kora-wallet-panel search filters the list", async () => {
     });
 });
 
-// Feature: selecting a handle emits kora-handle-select and makes it the selected one.
-test("kora-wallet-panel emits kora-handle-select on row click", async () => {
+// Feature: a drawer row click emits kora-handle-select with source "user".
+test("kora-wallet-panel emits kora-handle-select (source=user) on row click", async () => {
     await withFakeCardano({ eternl: fakeWallet }, async () => {
         const { panel } = await mountConnectedPanel();
-        let picked = null;
-        panel.addEventListener("kora-handle-select", (e) => (picked = e.detail.name));
+        let detail = null;
+        panel.addEventListener("kora-handle-select", (e) => (detail = e.detail));
         panel.querySelector('.kora-wallet-panel__row[data-name="apprentices"]').click();
-        assert.equal(picked, "apprentices");
+        assert.equal(detail.name, "apprentices");
+        assert.equal(detail.previous, "amber");
+        assert.equal(detail.source, "user");
         assert.equal(panel.selected, "apprentices");
         assert.equal(panel.querySelector('[data-ref="handle"]').textContent, "apprentices");
+    });
+});
+
+// Feature: programmatic/auto selection fires the SAME event (source=programmatic), and unchanged
+// assignments are deduped (no event).
+test("kora-handle-select fires on programmatic selection and dedupes", async () => {
+    await withFakeCardano({ eternl: fakeWallet }, async () => {
+        const { panel } = await mountConnectedPanel(); // selected is already "amber"
+        const events = [];
+        panel.addEventListener("kora-handle-select", (e) => events.push(e.detail));
+
+        panel.selected = "apprentices"; // real change → emit
+        assert.equal(events.length, 1);
+        assert.deepEqual(
+            { name: events[0].name, previous: events[0].previous, source: events[0].source },
+            { name: "apprentices", previous: "amber", source: "programmatic" },
+        );
+
+        panel.selected = "apprentices"; // unchanged → no emit
+        assert.equal(events.length, 1);
+
+        panel.selected = null; // change → emit with name null (e.g. on disconnect)
+        assert.equal(events.length, 2);
+        assert.equal(events[1].name, null);
     });
 });
 
