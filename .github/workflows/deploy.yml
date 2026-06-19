@@ -1,0 +1,41 @@
+name: kora-site-resources
+on:
+    push:
+        branches:
+            - master
+    workflow_dispatch:
+permissions:
+    contents: read
+    id-token: write # OIDC trusted publishing to npm
+jobs:
+    deploy:
+        name: Deploying from ${{ github.ref_name }}
+        environment: mainnet
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  registry-url: https://registry.npmjs.org
+                  scope: '@koralabs'
+
+            - name: Install deps
+              run: npm install --no-audit --no-fund
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Test
+              run: npm test
+
+            - name: Build
+              run: npm run build
+
+            # npm publish via OIDC trusted publishing. tsc emits to lib/ (with CSS copied in);
+            # publish from there with package.json + README copied in (main=index.js -> lib/index.js).
+            - name: Publish to npm
+              run: cp package.json README.md ./lib/ && cd ./lib && npm publish --provenance --access public

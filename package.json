@@ -1,6 +1,6 @@
 {
     "name": "@koralabs/kora-site-resources",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
     "type": "module",
     "license": "ISC",
@@ -9,57 +9,54 @@
         "type": "git",
         "url": "git+https://github.com/koralabs/kora-site-resources.git"
     },
-    "main": "lib/index.js",
-    "module": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "main": "index.js",
+    "module": "index.js",
+    "types": "index.d.ts",
     "sideEffects": [
-        "./lib/components/**/index.js",
+        "./components/**/index.js",
         "*.css"
-    ],
-    "files": [
-        "lib"
     ],
     "exports": {
         ".": {
-            "types": "./lib/index.d.ts",
-            "default": "./lib/index.js"
+            "types": "./index.d.ts",
+            "default": "./index.js"
         },
         "./ssr": {
-            "types": "./lib/ssr/index.d.ts",
-            "default": "./lib/ssr/index.js"
+            "types": "./ssr/index.d.ts",
+            "default": "./ssr/index.js"
         },
         "./base": {
-            "types": "./lib/components/base/kora-element.d.ts",
-            "default": "./lib/components/base/kora-element.js"
+            "types": "./components/base/kora-element.d.ts",
+            "default": "./components/base/kora-element.js"
         },
         "./env": {
-            "types": "./lib/env/index.d.ts",
-            "default": "./lib/env/index.js"
+            "types": "./env/index.d.ts",
+            "default": "./env/index.js"
         },
         "./wallet": {
-            "types": "./lib/wallet/index.d.ts",
-            "default": "./lib/wallet/index.js"
+            "types": "./wallet/index.d.ts",
+            "default": "./wallet/index.js"
         },
         "./wallet/handles": {
-            "types": "./lib/wallet/handles.d.ts",
-            "default": "./lib/wallet/handles.js"
+            "types": "./wallet/handles.d.ts",
+            "default": "./wallet/handles.js"
         },
         "./wallet/handle-api": {
-            "types": "./lib/wallet/handle-api.d.ts",
-            "default": "./lib/wallet/handle-api.js"
+            "types": "./wallet/handle-api.d.ts",
+            "default": "./wallet/handle-api.js"
         },
         "./tokens": {
-            "types": "./lib/tokens/index.d.ts",
-            "default": "./lib/tokens/index.js"
+            "types": "./tokens/index.d.ts",
+            "default": "./tokens/index.js"
         },
-        "./tokens.css": "./lib/tokens/tokens.css",
-        "./styles/layers.css": "./lib/styles/layers.css",
-        "./styles/reset.css": "./lib/styles/reset.css",
+        "./tokens.css": "./tokens/tokens.css",
+        "./styles/layers.css": "./styles/layers.css",
+        "./styles/reset.css": "./styles/reset.css",
         "./components/*": {
-            "types": "./lib/components/*/index.d.ts",
-            "default": "./lib/components/*/index.js"
+            "types": "./components/*/index.d.ts",
+            "default": "./components/*/index.js"
         },
-        "./components/*.css": "./lib/components/*.css"
+        "./components/*.css": "./components/*.css"
     },
     "scripts": {
         "build": "tsc && node scripts/copy-assets.mjs",
