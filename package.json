@@ -1,6 +1,6 @@
 {
     "name": "@koralabs/kora-site-resources",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
     "type": "module",
     "license": "ISC",

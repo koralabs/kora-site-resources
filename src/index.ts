@@ -6,8 +6,7 @@
 export { KoraElement, SSR_MARKER } from "./components/base/kora-element.js";
 export { token } from "./tokens/index.js";
 
-export * from "./env/index.js";
-export * from "./env/links.js";
+export * from "./env/index.js"; // includes the link-set helpers (re-exported from ./env/links.js)
 export { clearHandleSiteData } from "./site/clear-site-data.js";
 export type { ClearSiteDataOptions } from "./site/clear-site-data.js";
 export * from "./wallet/index.js";

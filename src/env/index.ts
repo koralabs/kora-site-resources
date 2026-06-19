@@ -77,3 +77,7 @@ export function personalizeUrl(handle: string, opts: KoraSiteUrlOptions = {}): s
 export function subhandlesUrl(handle: string, opts: KoraSiteUrlOptions = {}): string {
     return siteUrl("portal", { ...opts, path: `/~/${handle}/subhandles` });
 }
+
+// The link-set helpers are part of the env API — re-export them so the "./env" subpath is complete
+// (koraNavLinks / koraFooterLinks / koraResourceLinks alongside siteUrl / getEnvironment).
+export * from "./links.js";
