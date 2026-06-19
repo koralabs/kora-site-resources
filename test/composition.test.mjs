@@ -9,12 +9,12 @@ const tick = () => new Promise((resolve) => queueMicrotask(resolve));
 
 // Feature: header projects default children into nav and slot="actions" children into the actions
 // region, and renders a configurable brand.
-test("kora-header slots nav + actions and renders the brand", async () => {
+test("kora-header renders the default global nav, then appends site links + routes actions", async () => {
     document.body.innerHTML = "";
     const el = document.createElement("kora-header");
     el.setAttribute("brand-label", "H.A.L.");
     const navLink = document.createElement("a");
-    navLink.textContent = "Mint";
+    navLink.textContent = "Create policy";
     const action = document.createElement("button");
     action.setAttribute("slot", "actions");
     action.textContent = "Connect";
@@ -22,21 +22,38 @@ test("kora-header slots nav + actions and renders the brand", async () => {
     document.body.appendChild(el);
     await tick();
 
-    assert.equal(el.querySelector(".kora-header__nav > a"), navLink); // nav child projected
-    assert.equal(el.querySelector(".kora-header__actions > button"), action); // actions child routed by slot
+    const navLabels = [...el.querySelectorAll(".kora-header__nav > a")].map((a) => a.textContent);
+    // Shared global trio is present BY DEFAULT, with the site's own link appended after.
+    assert.deepEqual(navLabels, ["Mint", "H.A.L.", "Merch", "Create policy"]);
+    assert.equal(el.querySelector(".kora-header__nav > a:last-child"), navLink); // site link projected last
+    assert.equal(el.querySelector(".kora-header__actions > button"), action); // actions routed by slot
     assert.equal(el.querySelector("kora-brand .kora-brand__label").textContent, "H.A.L."); // brand rendered
-    // Negative control: a broken slot router would leave the action in nav (or drop it).
 });
 
-// Feature: header SSR output carries the brand label so the client adopts it without re-rendering.
-test("renderKoraHeader embeds brand + nav + actions markup", () => {
+// Feature: default-nav="false" omits the shared trio (site provides its own nav entirely).
+test("kora-header default-nav=false omits the shared trio", async () => {
+    document.body.innerHTML = "";
+    const el = document.createElement("kora-header");
+    el.setAttribute("default-nav", "false");
+    const only = document.createElement("a");
+    only.textContent = "Only";
+    el.append(only);
+    document.body.appendChild(el);
+    await tick();
+    assert.deepEqual([...el.querySelectorAll(".kora-header__nav > a")].map((a) => a.textContent), ["Only"]);
+});
+
+// Feature: header SSR renders the default trio + appended site nav + routed actions.
+test("renderKoraHeader embeds brand + default trio + site nav + actions", () => {
     const html = renderKoraHeader({
         brandLabel: "H.A.L.",
-        nav: '<a href="/mint">Mint</a>',
+        env: "mainnet",
+        nav: '<a href="#/create">Create policy</a>',
         actions: "<span>x</span>",
     });
     assert.match(html, /brand-label="H\.A\.L\."/);
-    assert.match(html, /<a href="\/mint">Mint<\/a>/);
+    assert.match(html, /href="https:\/\/mint\.handle\.me"/); // default trio present
+    assert.match(html, /<a href="#\/create">Create policy<\/a>/); // site link appended
     assert.match(html, /data-kora-slot="actions"><span>x<\/span>/);
 });
 

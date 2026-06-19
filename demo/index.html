@@ -21,10 +21,9 @@
 <body>
     <kora-background></kora-background>
 
+    <!-- The shared global nav (Mint / H.A.L. / Merch) is rendered by the header itself; a site would
+         author extra links here as default children to append them. -->
     <kora-header brand-label="handle" brand-href="/">
-        <a href="https://mint.handle.me" target="_blank" rel="noopener">Mint</a>
-        <a href="https://hal.handle.me" target="_blank" rel="noopener">H.A.L.</a>
-        <a href="https://merch.handle.me" target="_blank" rel="noopener">Merch</a>
         <kora-wallet-button slot="actions"></kora-wallet-button>
         <kora-menu slot="actions"></kora-menu>
     </kora-header>

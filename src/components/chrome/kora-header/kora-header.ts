@@ -7,14 +7,18 @@ import type { KoraHeaderState } from "./template.js";
  * <kora-header> — top nav bar. Brand is configurable (`brand-label`, default "handle"); author nav
  * links as default children and right-side actions with `slot="actions"`:
  *
- *   <kora-header brand-label="H.A.L." brand-href="/">
- *     <a href="/mint">Mint</a><a href="/portal">Portal</a>
- *     <kora-handle-indicator slot="actions" handle="…"></kora-handle-indicator>
+ * The shared global nav (Mint / H.A.L. / Merch) is rendered by default; author your own nav links
+ * as default children to APPEND them, and right-side actions with `slot="actions"`. Set
+ * `default-nav="false"` to omit the shared links.
+ *
+ *   <kora-header brand-label="secrets" brand-href="/">
+ *     <a href="#/create">Create policy</a><a href="#/recover">Recover</a>
+ *     <kora-wallet-button slot="actions"></kora-wallet-button>
  *   </kora-header>
  */
 export class KoraHeader extends KoraElement<KoraHeaderState> {
     static get observedAttributes(): string[] {
-        return ["brand-label", "brand-href"];
+        return ["brand-label", "brand-href", "default-nav"];
     }
 
     protected override get preservesChildren(): boolean {
@@ -22,7 +26,7 @@ export class KoraHeader extends KoraElement<KoraHeaderState> {
     }
 
     protected override initialState(): KoraHeaderState {
-        return { brandLabel: "handle", brandHref: null };
+        return { brandLabel: "handle", brandHref: null, defaultNav: true };
     }
 
     protected override template(): string {
@@ -32,6 +36,7 @@ export class KoraHeader extends KoraElement<KoraHeaderState> {
     override attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
         if (name === "brand-label") this.state.brandLabel = value ?? "handle";
         else if (name === "brand-href") this.state.brandHref = value;
+        else if (name === "default-nav") this.state.defaultNav = value !== "false";
     }
 
     protected override update(): void {
