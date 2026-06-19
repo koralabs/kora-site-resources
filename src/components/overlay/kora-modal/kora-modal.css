@@ -1,0 +1,92 @@
+@layer kora.components {
+    kora-modal {
+        position: fixed;
+        inset: 0;
+        z-index: var(--kora-z-drawer);
+        display: grid;
+        place-items: center;
+        padding: var(--kora-space-4);
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--kora-duration-base) var(--kora-ease),
+            visibility var(--kora-duration-base) var(--kora-ease);
+    }
+
+    kora-modal[open] {
+        pointer-events: auto;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .kora-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background: var(--kora-overlay);
+        backdrop-filter: blur(var(--kora-glass-blur-sm));
+        -webkit-backdrop-filter: blur(var(--kora-glass-blur-sm));
+    }
+
+    .kora-modal__dialog {
+        position: relative;
+        width: 100%;
+        max-width: 28rem;
+        max-height: calc(100vh - 2 * var(--kora-space-8));
+        overflow: hidden auto;
+        transform: scale(0.96);
+        transition: transform var(--kora-duration-base) var(--kora-ease-out);
+    }
+    kora-modal[open] .kora-modal__dialog {
+        transform: scale(1);
+    }
+
+    /* Gradient top border (handle.me modal accent). */
+    .kora-modal__dialog::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 1px;
+        background: linear-gradient(90deg, #3269b1 0%, #ffffff 48.96%, #3268af 100%);
+    }
+
+    .kora-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--kora-space-4) var(--kora-space-6);
+        border-bottom: 1px solid var(--kora-glass-border);
+    }
+
+    .kora-modal__title {
+        margin: 0;
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-lg);
+        font-weight: 600;
+        color: var(--kora-color-text);
+    }
+
+    .kora-modal__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.5rem;
+        line-height: 1;
+        background: none;
+        border: none;
+        border-radius: var(--kora-radius-md);
+        color: var(--kora-color-text-muted);
+        cursor: pointer;
+        transition: color var(--kora-duration-fast) var(--kora-ease),
+            background-color var(--kora-duration-fast) var(--kora-ease);
+    }
+    .kora-modal__close:hover {
+        color: var(--kora-color-text);
+        background: var(--kora-surface-2);
+    }
+
+    .kora-modal__body {
+        padding: var(--kora-space-6);
+    }
+}

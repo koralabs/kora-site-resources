@@ -1,0 +1,35 @@
+@layer kora.components {
+    .kora-tabs {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        background: var(--kora-surface-1);
+        border: 1px solid var(--kora-color-border);
+        border-radius: var(--kora-radius-lg);
+    }
+
+    .kora-tabs__tab {
+        padding: var(--kora-space-2) var(--kora-space-4);
+        background: none;
+        border: none;
+        border-radius: var(--kora-radius-md);
+        color: var(--kora-color-text-muted);
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-sm);
+        font-weight: var(--kora-font-weight-medium);
+        cursor: pointer;
+        transition: background-color var(--kora-duration-fast) var(--kora-ease),
+            color var(--kora-duration-fast) var(--kora-ease);
+    }
+    .kora-tabs__tab:hover {
+        color: var(--kora-color-text);
+    }
+    .kora-tabs__tab[aria-selected="true"] {
+        background: var(--kora-color-accent);
+        color: var(--kora-white);
+    }
+    .kora-tabs__tab:focus-visible {
+        outline: 2px solid var(--kora-color-accent);
+        outline-offset: 2px;
+    }
+}

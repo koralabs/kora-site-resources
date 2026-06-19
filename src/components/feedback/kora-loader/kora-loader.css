@@ -1,0 +1,31 @@
+@layer kora.components {
+    kora-loader {
+        --kora-loader-size: 48px;
+        display: inline-block;
+        position: relative;
+        width: var(--kora-loader-size);
+        height: var(--kora-loader-size);
+    }
+
+    .kora-loader__ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: var(--kora-color-primary);
+        animation: kora-spin 2s linear infinite;
+    }
+
+    .kora-loader__ring--inner {
+        inset: 22%;
+        border-top-color: var(--kora-color-accent);
+        animation-duration: 2.2s;
+        animation-direction: reverse;
+    }
+
+    @keyframes kora-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}

@@ -1,0 +1,51 @@
+@layer kora.components {
+    .kora-radio {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--kora-space-2);
+        cursor: pointer;
+        font-family: var(--kora-font-sans);
+        color: var(--kora-color-text);
+    }
+
+    .kora-radio__dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.15rem;
+        height: 1.15rem;
+        flex: none;
+        border: 1.5px solid var(--kora-gray-300);
+        border-radius: 50%;
+        background: var(--kora-surface-1);
+        transition: border-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-radio__dot::after {
+        content: "";
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--kora-color-primary);
+        transform: scale(0);
+        transition: transform var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-radio__input:checked + .kora-radio__dot {
+        border-color: var(--kora-color-primary);
+    }
+    .kora-radio__input:checked + .kora-radio__dot::after {
+        transform: scale(1);
+    }
+    .kora-radio__input:focus-visible + .kora-radio__dot {
+        outline: 2px solid var(--kora-color-accent);
+        outline-offset: 2px;
+    }
+    .kora-radio__input:disabled ~ * {
+        opacity: 0.5;
+    }
+
+    .kora-radio__label {
+        font-size: var(--kora-text-md);
+    }
+}

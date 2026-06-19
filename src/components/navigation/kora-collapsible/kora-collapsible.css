@@ -1,0 +1,54 @@
+@layer kora.components {
+    kora-collapsible {
+        display: block;
+        border: 1px solid var(--kora-color-border);
+        border-radius: var(--kora-radius-lg);
+        overflow: hidden;
+    }
+
+    .kora-collapsible__trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--kora-space-3);
+        width: 100%;
+        padding: var(--kora-space-3) var(--kora-space-4);
+        background: var(--kora-surface-1);
+        border: none;
+        color: var(--kora-color-text);
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-md);
+        font-weight: var(--kora-font-weight-medium);
+        text-align: left;
+        cursor: pointer;
+    }
+    .kora-collapsible__trigger:hover {
+        background: var(--kora-surface-2);
+    }
+
+    .kora-collapsible__chevron {
+        flex: none;
+        transition: transform var(--kora-duration-base) var(--kora-ease);
+    }
+    kora-collapsible[open] .kora-collapsible__chevron {
+        transform: rotate(180deg);
+    }
+
+    /* Animate auto height via grid-rows 0fr → 1fr (no JS measuring). */
+    .kora-collapsible__region {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows var(--kora-duration-base) var(--kora-ease);
+    }
+    kora-collapsible[open] .kora-collapsible__region {
+        grid-template-rows: 1fr;
+    }
+
+    .kora-collapsible__inner {
+        overflow: hidden;
+    }
+    .kora-collapsible__inner > * {
+        padding: var(--kora-space-4);
+        margin: 0;
+    }
+}

@@ -19,6 +19,16 @@ import {
     renderKoraButton,
     renderKoraWalletButton,
     renderKoraMenu,
+    renderKoraInput,
+    renderKoraSelect,
+    renderKoraCheckbox,
+    renderKoraRadio,
+    renderKoraSwitch,
+    renderKoraTabs,
+    renderKoraCollapsible,
+    renderKoraTooltip,
+    renderKoraLoader,
+    renderKoraModal,
 } from "../lib/ssr/index.js";
 import { koraNavLinks, koraFooterLinks } from "../lib/env/links.js";
 import { getEnvironment } from "../lib/env/index.js";
@@ -44,6 +54,18 @@ const STYLES = [
     "/lib/components/wallet/kora-wallet-button/kora-wallet-button.css",
     "/lib/components/wallet/kora-wallet-panel/kora-wallet-panel.css",
     "/lib/components/overlay/kora-drawer/kora-drawer.css",
+    "/lib/components/overlay/kora-modal/kora-modal.css",
+    "/lib/styles/utilities.css",
+    "/lib/components/feedback/kora-loader/kora-loader.css",
+    "/lib/components/feedback/kora-tooltip/kora-tooltip.css",
+    "/lib/components/feedback/kora-toast/kora-toast.css",
+    "/lib/components/forms/kora-checkbox/kora-checkbox.css",
+    "/lib/components/forms/kora-radio/kora-radio.css",
+    "/lib/components/forms/kora-switch/kora-switch.css",
+    "/lib/components/forms/kora-input/kora-input.css",
+    "/lib/components/forms/kora-select/kora-select.css",
+    "/lib/components/navigation/kora-tabs/kora-tabs.css",
+    "/lib/components/navigation/kora-collapsible/kora-collapsible.css",
 ];
 
 function page(env) {
@@ -88,6 +110,11 @@ function page(env) {
         .demo-profile__addr { margin: var(--kora-space-1) 0 0; font-family: var(--kora-font-mono); font-size: var(--kora-text-sm); color: var(--kora-drawer-ink-muted); }
         .demo-handles { display: grid; gap: var(--kora-space-2); }
         .demo-handle { padding: var(--kora-space-3) var(--kora-space-4); font-family: var(--kora-font-mono); }
+        .demo-components { padding: var(--kora-space-8); display: grid; gap: var(--kora-space-6); }
+        .demo-components h2 { margin: 0; }
+        .demo-row { display: flex; flex-wrap: wrap; gap: var(--kora-space-4); align-items: flex-start; }
+        .demo-row--center { align-items: center; }
+        .demo-help { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--kora-surface-2); cursor: help; }
     </style>
 </head>
 <body>
@@ -111,17 +138,45 @@ function page(env) {
             <div class="kora-glass demo-card"><h3>Wallet</h3><p>The chosen-handle indicator — click it (top right) to open the drawer.</p></div>
             <div class="kora-glass demo-card"><h3>Aero / Glass</h3><p>These very panels: the frosted recipe from hal.handle.me.</p></div>
         </section>
+
+        <section class="kora-glass demo-components">
+            <h2>Common components</h2>
+            ${renderKoraTabs({ tabs: [{ id: "a", label: "Overview" }, { id: "b", label: "Details" }, { id: "c", label: "More" }] })}
+
+            <div class="demo-row">
+                ${renderKoraInput({ label: "Handle", placeholder: "your handle" })}
+                ${renderKoraSelect({ placeholder: "Network", options: [{ value: "mainnet", label: "Mainnet" }, { value: "preview", label: "Preview" }, { value: "preprod", label: "Preprod" }] })}
+            </div>
+
+            <div class="demo-row demo-row--center">
+                ${renderKoraCheckbox({ label: "I agree", checked: true })}
+                ${renderKoraSwitch({ label: "Notifications", checked: true })}
+                ${renderKoraRadio({ name: "plan", value: "free", label: "Free", checked: true })}
+                ${renderKoraRadio({ name: "plan", value: "pro", label: "Pro" })}
+                ${renderKoraTooltip({ text: "This is a tooltip", position: "top", trigger: '<span class="demo-help">?</span>' })}
+                ${renderKoraLoader({ size: 28 })}
+            </div>
+
+            <div class="demo-row demo-row--center">
+                ${renderKoraButton({ label: "Open dialog", variant: "primary" })}
+                ${renderKoraButton({ label: "Success toast", variant: "secondary" })}
+                ${renderKoraButton({ label: "Error toast", variant: "outline" })}
+            </div>
+
+            ${renderKoraCollapsible({ title: "What is a Handle?", body: "<p>An Ada Handle is an NFT that doubles as your wallet address and identity across the ecosystem.</p>" })}
+        </section>
     </main>
 
     ${renderKoraFooter({ links })}
     ${renderKoraDrawer({ title: "Wallet & Handles", body: drawerBody })}
+    ${renderKoraModal({ title: "Example dialog", body: "<p>This is a kora-modal — the shared dialog shell. Close it with the ✕, the backdrop, or Escape.</p>" })}
 
     <!-- Client entry: registers + hydrates every element. No bundler — native ESM. -->
     <script type="module" src="/lib/index.js"></script>
     <script type="module">
         import {
             clearHandleSiteData, walletStore, rememberHandle, recallHandle,
-            fetchWalletHandles, HANDLE_POLICY_DEMI,
+            fetchWalletHandles, HANDLE_POLICY_DEMI, koraToast,
         } from "/lib/index.js";
         import { resolveWalletHandles, chooseDefaultHandle } from "/lib/wallet/handles.js";
 
@@ -182,6 +237,11 @@ function page(env) {
             if (link && link.tagName === "BUTTON" && link.textContent === "Clear site data") {
                 clearHandleSiteData();
             }
+            // Showcase buttons (matched by their label).
+            const label = e.target.closest("kora-button")?.getAttribute("label");
+            if (label === "Open dialog") document.querySelector("kora-modal")?.setAttribute("open", "");
+            else if (label === "Success toast") koraToast.success("Minted!", { message: "Transaction submitted." });
+            else if (label === "Error toast") koraToast.error("Something went wrong", { message: "Please try again." });
         });
     </script>
 </body>

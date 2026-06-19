@@ -6,4 +6,4 @@
  * always override our defaults; the `kora.overrides` layer is reserved for sanctioned in-library
  * overrides. This is the encapsulation strategy that replaces shadow DOM for light-DOM components.
  */
-@layer kora.reset, kora.tokens, kora.components, kora.overrides;
+@layer kora.reset, kora.tokens, kora.components, kora.utilities, kora.overrides;

@@ -1,0 +1,50 @@
+@layer kora.components {
+    .kora-input {
+        display: flex;
+        flex-direction: column;
+        gap: var(--kora-space-1);
+        font-family: var(--kora-font-sans);
+    }
+
+    .kora-input__label {
+        font-size: var(--kora-text-sm);
+        color: var(--kora-color-text-muted);
+    }
+
+    .kora-input__field {
+        width: 100%;
+        padding: 10px var(--kora-space-4);
+        background: var(--kora-color-surface);
+        border: 1px solid var(--kora-color-border);
+        border-radius: var(--kora-radius-lg);
+        color: var(--kora-color-text);
+        font-family: var(--kora-font-sans);
+        font-size: var(--kora-text-md);
+        transition: border-color var(--kora-duration-fast) var(--kora-ease);
+    }
+
+    .kora-input__field::placeholder {
+        color: var(--kora-color-text-muted);
+    }
+    .kora-input__field:focus {
+        outline: none;
+        border-color: var(--kora-color-accent);
+    }
+    .kora-input__field:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .kora-input__error {
+        font-size: var(--kora-text-sm);
+        color: var(--kora-color-danger);
+        min-height: 0;
+    }
+    .kora-input__error:empty {
+        display: none;
+    }
+
+    .kora-input--error .kora-input__field {
+        border-color: var(--kora-color-danger);
+    }
+}

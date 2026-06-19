@@ -35,7 +35,16 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `kora-wallet-button` | handle.me | connect picker → connecting → connected indicator (WalletStore) |
 | `kora-wallet-panel` | handle.me | drawer body: profile, View Portal/Personalize/SubHandles, search, handle list + badges |
 | `kora-drawer` | handle.me | opt-in slide-out panel, `open` attr, `kora-drawer-close` event |
+| `kora-modal` | handle.me | centered dialog shell (glass + gradient top border) |
+| `kora-loader` | handle.me | dual-ring spinner |
+| `kora-tooltip` | handle.me | positional hover/focus tooltip (pure CSS) |
+| `koraToast` | handle.me | imperative glass toast controller (no react-toastify) |
+| `kora-checkbox` / `kora-radio` / `kora-switch` / `kora-input` | handle.me | form controls over native inputs (form-participating) |
+| `kora-select` | handle.me | custom dropdown + hidden input for form submission |
+| `kora-tabs` | handle.me | segmented control, `kora-tab-change` event |
+| `kora-collapsible` | handle.me | accordion (CSS grid-rows height animation) |
 | `.kora-glass*` | hal.handle.me | frosted-glass utility classes |
+| `.kora-scrollbar` / `.kora-focus-ring` / `.kora-inset-shadow*` | handle.me | style utilities (`styles/utilities.css`) |
 
 Plus non-visual modules: `/env` (environment-aware handle.me URLs), `/wallet` (CIP-30 + reactive
 `WalletStore` + auto-reconnect), `/wallet/handles` (resolve on-chain Ada Handles from the CIP-30
