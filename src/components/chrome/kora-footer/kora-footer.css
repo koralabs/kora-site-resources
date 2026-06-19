@@ -9,7 +9,10 @@
         text-align: center;
     }
 
-    .kora-footer__link {
+    /* Style whatever links/buttons are slotted in — no class required (works for authored HTML
+     * children as well as the class the SSR renderer adds). */
+    .kora-footer > a,
+    .kora-footer > button {
         font-family: var(--kora-font-sans);
         font-size: var(--kora-text-sm);
         color: var(--kora-color-text-muted);
@@ -21,12 +24,13 @@
         transition: color var(--kora-duration-base) var(--kora-ease);
     }
 
-    .kora-footer__link:hover {
+    .kora-footer > a:hover,
+    .kora-footer > button:hover {
         color: var(--kora-gray-300);
     }
 
     /* Pipe dividers between items, drawn purely in CSS. */
-    .kora-footer__link:not(:first-child)::before {
+    .kora-footer > :not(:first-child)::before {
         content: "|";
         color: var(--kora-slate-600);
         margin-right: var(--kora-space-3);

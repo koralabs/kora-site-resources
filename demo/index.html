@@ -146,8 +146,8 @@
 
         document.addEventListener("click", (e) => {
             if (e.target.closest("kora-handle-indicator")) drawer?.setAttribute("open", "");
-            const link = e.target.closest(".kora-footer__link");
-            if (link && link.tagName === "BUTTON" && link.textContent === "Clear site data") clearHandleSiteData();
+            const footerBtn = e.target.closest("kora-footer button");
+            if (footerBtn && footerBtn.textContent.trim() === "Clear site data") clearHandleSiteData();
             const label = e.target.closest("kora-button")?.getAttribute("label");
             if (label === "Open dialog") document.querySelector("kora-modal")?.setAttribute("open", "");
             else if (label === "Success toast") koraToast.success("Minted!", { message: "Transaction submitted." });
