@@ -15,6 +15,8 @@ import { rememberWallet, recallWallet, forgetWallet, rememberHandle, recallHandl
 import { fetchWalletHandles } from "./handle-api.js";
 import { HANDLE_POLICY_DEMI } from "./policies.js";
 import { addressBech32 } from "./bech32.js";
+import { getEnvironment } from "../env/index.js";
+import type { KoraNetwork } from "../env/index.js";
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -75,6 +77,7 @@ export class WalletStore {
     #api: Cip30Api | null = null;
     #scheduled = false;
     #autoResolve = true;
+    #network: KoraNetwork | null = null;
 
     /** Whether connect() automatically resolves the wallet's handles (default true). Set false for a
      *  connection-only flow that doesn't need the handle list. */
@@ -83,6 +86,30 @@ export class WalletStore {
     }
     set autoResolve(value: boolean) {
         this.#autoResolve = value;
+    }
+
+    /**
+     * The Cardano network to resolve handles against. Leave null (default) to derive it: the wallet's
+     * own `networkId` decides mainnet vs testnet, and the host subdomain (preview./preprod.) picks the
+     * testnet flavour. Set this ONCE only if your app runs on a host that doesn't encode the network
+     * (e.g. a custom domain or localhost) and needs preview vs preprod pinned. This declares which
+     * network you're on — it is NOT a hook for supplying your own handles.
+     */
+    get network(): KoraNetwork | null {
+        return this.#network;
+    }
+    set network(value: KoraNetwork | null) {
+        this.#network = value;
+    }
+
+    /** Resolve the network to query: explicit override → host subdomain (if testnet) → the wallet's
+     *  networkId (1 = mainnet, 0 = testnet ⇒ preprod by default). */
+    #resolveEnv(): KoraNetwork {
+        if (this.#network) return this.#network;
+        const hostEnv = getEnvironment();
+        if (hostEnv !== "mainnet") return hostEnv; // host is served from preview./preprod.
+        if (this.#state.networkId === 0) return "preprod"; // wallet says testnet but host doesn't
+        return "mainnet";
     }
 
     constructor() {
@@ -172,7 +199,9 @@ export class WalletStore {
         const reward = this.#state.rewardAddressHex;
         if (!reward) return;
         try {
-            const api = await fetchWalletHandles(reward);
+            // Resolve against the network the WALLET is on — not the host's — so a testnet wallet is
+            // never queried against mainnet (which would silently return nothing).
+            const api = await fetchWalletHandles(reward, { env: this.#resolveEnv() });
             if (this.#state.rewardAddressHex !== reward) return; // changed/disconnected mid-flight
             const handles: WalletHandleSummary[] = api.map((handle) => ({
                 name: handle.name,
@@ -195,18 +224,13 @@ export class WalletStore {
         return regular?.name ?? handles[0]?.name ?? null;
     }
 
-    /** Choose the active handle; remembers it so a return visit lands on the same one. No-op if
-     *  unchanged. */
+    /** Choose the active handle among the resolved set; remembers it so a return visit lands on the
+     *  same one. No-op if unchanged. (Selecting ≠ supplying — the handle list is the store's to
+     *  resolve; there is intentionally no API to inject your own.) */
     selectHandle(name: string | null): void {
         if (name === this.#state.selectedHandle) return;
         this.#state.selectedHandle = name;
         if (name) rememberHandle(name); // remember explicit selections only
-    }
-
-    /** Override the handle list (e.g. a custom/offline source) and re-pick the default selection. */
-    setHandles(handles: WalletHandleSummary[]): void {
-        this.#state.handles = handles ?? [];
-        this.#state.selectedHandle = this.#pickDefault(this.#state.handles);
     }
 
     /**

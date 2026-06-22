@@ -70,8 +70,18 @@ Drop the wallet button + panel in and the kit wires the rest — no app glue:
 
 On connect the store resolves the wallet's handles (with images), auto-selects a default (the
 last-remembered one, else the first non-virtual), and exposes a friendly `addr1…` address — the
-button shows the `$handle`, the panel lists the rest, and clicking the pill opens the drawer. Opt
-out with `walletStore.autoResolve = false`, or feed a custom list via `panel.handles`.
+button shows the `$handle`, the panel lists the rest, and clicking the pill opens the drawer.
+
+Resolution targets the network the **wallet** is on (its `networkId`), not the host — so a testnet
+wallet is never queried against mainnet. The store resolves the handle list itself; there is **no**
+API for an app to supply its own. If your app runs on a host that doesn't encode the network (a
+custom domain / localhost) and needs preview vs preprod pinned, declare it once:
+
+```js
+walletStore.network = "preview"; // or "preprod" / "mainnet"; default derives from networkId + host
+```
+
+`walletStore.autoResolve = false` disables resolution entirely for a connection-only flow.
 
 ## How it works (no framework)
 

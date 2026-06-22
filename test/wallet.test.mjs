@@ -145,17 +145,42 @@ test("WalletStore.connect auto-resolves handles + selects a default", async () =
     }
 });
 
-// Feature: selectHandle changes + remembers the active handle; setHandles re-picks the default.
-test("WalletStore.selectHandle + setHandles", async () => {
+// Feature: selectHandle changes the active handle (and dedupes); there is NO setHandles — apps
+// cannot inject their own list, the store resolves it.
+test("WalletStore.selectHandle changes the active handle (no setHandles)", async () => {
     forgetHandle();
     const store = new WalletStore();
-    store.setHandles([
-        { name: "alpha", virtual: false, isDeMi: false, image: null },
-        { name: "beta", virtual: false, isDeMi: false, image: null },
-    ]);
-    assert.equal(store.state.selectedHandle, "alpha"); // first non-virtual
+    assert.equal(typeof store.setHandles, "undefined", "setHandles is intentionally not exposed");
+    store.selectHandle("alpha");
+    assert.equal(store.state.selectedHandle, "alpha");
     store.selectHandle("beta");
     assert.equal(store.state.selectedHandle, "beta");
     store.selectHandle("beta"); // unchanged → still beta
     assert.equal(store.state.selectedHandle, "beta");
+});
+
+// Feature: handles resolve against the WALLET's network — an explicit `network` pins preview/preprod,
+// otherwise a testnet wallet (networkId 0) defaults to preprod rather than silently hitting mainnet.
+test("WalletStore resolves handles against the wallet's network", async () => {
+    const realFetch = globalThis.fetch;
+    let calledUrl = null;
+    globalThis.fetch = async (url) => {
+        calledUrl = String(url);
+        return new Response("[]", { status: 200, headers: { "content-type": "application/json" } });
+    };
+    try {
+        const testnetWallet = fakeWallet({ getNetworkId: async () => 0 });
+        await withFakeCardano({ eternl: testnetWallet }, async () => {
+            const explicit = new WalletStore();
+            explicit.network = "preview";
+            await explicit.connect("eternl");
+            assert.match(calledUrl, /preview\.api\.handle\.me/, "explicit network pins preview");
+
+            const auto = new WalletStore(); // no explicit network; host (demo.handle.me) is mainnet
+            await auto.connect("eternl");
+            assert.match(calledUrl, /preprod\.api\.handle\.me/, "testnet wallet defaults to preprod, not mainnet");
+        });
+    } finally {
+        globalThis.fetch = realFetch;
+    }
 });

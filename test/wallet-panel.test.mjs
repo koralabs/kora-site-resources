@@ -30,25 +30,34 @@ const fakeWallet = {
     }),
 };
 
-async function mountConnectedPanel() {
+const DEFAULT_HANDLES = [
+    { name: "amber", handle_type: "handle" },
+    { name: "apprentices", handle_type: "handle" },
+    { name: "sub@hal", handle_type: "virtual_subhandle" },
+];
+
+// Mount a panel against a store that resolves the given handle list (via a stubbed Handle API) on
+// connect — the only way handles enter the panel now (no setHandles). fetch is restored once
+// resolution has completed.
+async function mountConnectedPanel(apiHandles = DEFAULT_HANDLES) {
     forgetHandle(); // deterministic default selection (no remembered handle)
     document.body.innerHTML = "";
-    const store = new WalletStore();
-    store.autoResolve = false; // feed handles explicitly below instead of hitting the network
-    const panel = document.createElement("kora-wallet-panel");
-    panel.store = store;
-    panel.setAttribute("env", "mainnet");
-    document.body.appendChild(panel);
-    await tick();
-    await store.connect("eternl");
-    await flush();
-    panel.handles = [
-        { name: "amber", virtual: false, isDeMi: false, image: null },
-        { name: "apprentices", virtual: false, isDeMi: false, image: null },
-        { name: "sub@hal", virtual: true, isDeMi: false, image: null },
-    ];
-    panel.selected = "amber";
-    return { store, panel };
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async () =>
+        new Response(JSON.stringify(apiHandles), { status: 200, headers: { "content-type": "application/json" } });
+    try {
+        const store = new WalletStore(); // autoResolve default true
+        const panel = document.createElement("kora-wallet-panel");
+        panel.store = store;
+        panel.setAttribute("env", "mainnet");
+        document.body.appendChild(panel);
+        await tick();
+        await store.connect("eternl");
+        await flush();
+        return { store, panel };
+    } finally {
+        globalThis.fetch = realFetch;
+    }
 }
 
 // Feature: the profile shows the selected handle, the address, and env-aware action links.
@@ -79,13 +88,10 @@ test("kora-wallet-panel lists other handles with badges", async () => {
 // Feature: handles with an image render a <kora-ipfs-image> avatar (failover), not a placeholder.
 test("kora-wallet-panel shows handle images via kora-ipfs-image", async () => {
     await withFakeCardano({ eternl: fakeWallet }, async () => {
-        const { panel } = await mountConnectedPanel();
-        panel.handles = [
-            { name: "amber", virtual: false, isDeMi: false, image: "ipfs://cidSelected" },
-            { name: "apprentices", virtual: false, isDeMi: false, image: "ipfs://cidRow" },
-        ];
-        panel.selected = "amber";
-        await tick();
+        const { panel } = await mountConnectedPanel([
+            { name: "amber", handle_type: "handle", image: "ipfs://cidSelected" },
+            { name: "apprentices", handle_type: "handle", image: "ipfs://cidRow" },
+        ]);
         // Profile avatar = the selected handle's image.
         const avatar = panel.querySelector('[data-ref="avatar"] kora-ipfs-image');
         assert.ok(avatar, "profile avatar uses kora-ipfs-image");

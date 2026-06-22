@@ -40,7 +40,7 @@ export class KoraWalletPanel extends KoraElement {
         this.#store = store;
         if (this.#unsubscribe) {
             this.#unsubscribe();
-            this.#lastSelected = store.state.selectedHandle;
+            this.#lastSelected = null;
             this.#unsubscribe = this.#store.subscribe(this.#onState);
         }
     }
@@ -48,10 +48,8 @@ export class KoraWalletPanel extends KoraElement {
         return this.#store;
     }
 
-    /** Override the handle list (custom/offline source) — flows through the store. */
-    set handles(handles: WalletHandleSummary[]) {
-        this.#store.setHandles(handles ?? []);
-    }
+    /** Read-only view of the resolved handles. There is intentionally no setter — the store resolves
+     *  the wallet's handles itself (per network); apps don't supply their own. */
     get handles(): WalletHandleSummary[] {
         return this.#store.state.handles;
     }
@@ -82,7 +80,10 @@ export class KoraWalletPanel extends KoraElement {
         this.#refs.list?.addEventListener("click", this.#onListClick);
         this.#refs.search?.addEventListener("input", this.#onSearch);
         document.addEventListener("kora-wallet-open", this.#onWalletOpen);
-        this.#lastSelected = this.#store.state.selectedHandle; // don't emit on initial adopt
+        // Baseline is null (not the current selection) so a panel that hydrates AFTER the wallet has
+        // already connected + resolved still emits kora-handle-select for the active handle — the
+        // hydration-vs-connect race no longer swallows the event.
+        this.#lastSelected = null;
         this.#unsubscribe = this.#store.subscribe(this.#onState);
     }
 
