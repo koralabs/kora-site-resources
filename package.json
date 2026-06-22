@@ -1,6 +1,6 @@
 {
     "name": "@koralabs/kora-site-resources",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
     "type": "module",
     "license": "ISC",
@@ -88,14 +88,6 @@
         "@scure/base": "^1.2.6",
         "cborg": "^5.1.1",
         "lucide": "^1.21.0"
-    },
-    "peerDependencies": {
-        "@koralabs/kora-labs-common": ">=6.7.6"
-    },
-    "peerDependenciesMeta": {
-        "@koralabs/kora-labs-common": {
-            "optional": true
-        }
     },
     "devDependencies": {
         "@happy-dom/global-registrator": "^20.10.6",
