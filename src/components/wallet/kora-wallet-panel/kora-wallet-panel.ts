@@ -1,8 +1,8 @@
 import { KoraElement } from "../../base/kora-element.js";
-import { WALLET_PANEL_SHELL, handleRowHTML } from "./template.js";
-import type { KoraHandleItem } from "./template.js";
+import "../../media/kora-ipfs-image/index.js"; // register <kora-ipfs-image> for handle avatars
+import { WALLET_PANEL_SHELL, handleRowHTML, profileAvatarHTML } from "./template.js";
 import { walletStore } from "../../../wallet/index.js";
-import type { WalletStore, WalletState } from "../../../wallet/index.js";
+import type { WalletStore, WalletState, WalletHandleSummary } from "../../../wallet/index.js";
 import { portalUrl, personalizeUrl, subhandlesUrl } from "../../../env/index.js";
 import type { KoraNetwork } from "../../../env/index.js";
 
@@ -10,14 +10,18 @@ const short = (addr: string | null | undefined): string =>
     addr && addr.length > 16 ? `${addr.slice(0, 10)}…${addr.slice(-6)}` : (addr ?? "");
 
 /**
- * <kora-wallet-panel> — the "Wallet & Handles" drawer body. Subscribes to a WalletStore for the
- * connected address; the app supplies the resolved handles (via `.handles`) and the active handle
- * (`.selected` / attribute).
+ * <kora-wallet-panel> — the "Wallet & Handles" drawer body. It is SELF-POPULATING: it subscribes to
+ * a WalletStore and reflects whatever that store resolved on connect — the handle list (with real
+ * images via gateway failover), the active handle, and the friendly bech32 address. No app glue is
+ * required; drop it into a <kora-drawer> and it fills itself. (The store auto-resolves handles on
+ * connect; set `walletStore.autoResolve = false` to opt out, or feed a custom list via `.handles`.)
+ *
+ * It also opens its containing <kora-drawer> when the wallet pill dispatches `kora-wallet-open`, so
+ * clicking the connected handle indicator opens the drawer with no wiring.
  *
  * Events (all bubble + composed):
- *   - `kora-handle-select` — fires on ANY change to the selected handle, whether a drawer click OR
- *     a programmatic/auto selection (e.g. `panel.selected = …` on connect). Deduped to real
- *     changes. detail: `{ name: string | null, previous: string | null, source: "user" | "programmatic" }`.
+ *   - `kora-handle-select` — fires on ANY change to the selected handle (drawer click OR auto/
+ *     programmatic). detail: `{ name, previous, source: "user" | "programmatic" }`.
  *   - `kora-disconnect`, `kora-settings`.
  */
 export class KoraWalletPanel extends KoraElement {
@@ -28,45 +32,36 @@ export class KoraWalletPanel extends KoraElement {
     #refs: Record<string, HTMLElement> = {};
     #store: WalletStore = walletStore;
     #unsubscribe: (() => void) | null = null;
-    #handles: KoraHandleItem[] = [];
-    #selected: string | null = null;
     #search = "";
-    #address: string | null = null;
+    #lastSelected: string | null = null;
+    #pendingUserSelect: string | null = null;
 
     set store(store: WalletStore) {
         this.#store = store;
         if (this.#unsubscribe) {
             this.#unsubscribe();
+            this.#lastSelected = store.state.selectedHandle;
             this.#unsubscribe = this.#store.subscribe(this.#onState);
         }
     }
-
-    set handles(handles: KoraHandleItem[]) {
-        this.#handles = handles ?? [];
-        this.#renderList();
-    }
-    get handles(): KoraHandleItem[] {
-        return this.#handles;
+    get store(): WalletStore {
+        return this.#store;
     }
 
+    /** Override the handle list (custom/offline source) — flows through the store. */
+    set handles(handles: WalletHandleSummary[]) {
+        this.#store.setHandles(handles ?? []);
+    }
+    get handles(): WalletHandleSummary[] {
+        return this.#store.state.handles;
+    }
+
+    /** Programmatically select a handle (app-driven). Emits like a pick (source: programmatic). */
     set selected(name: string | null) {
-        // Programmatic selection (app-driven, e.g. auto-select on connect) — emits like a user pick.
-        this.#applySelected(name, "programmatic");
+        this.#store.selectHandle(name);
     }
     get selected(): string | null {
-        return this.#selected;
-    }
-
-    /** Update the selected handle and, on an actual change, fire `kora-handle-select`. `source` is
-     *  "user" for a drawer click or "programmatic" for an app/auto selection. */
-    #applySelected(name: string | null, source: "user" | "programmatic"): void {
-        const next = name ?? null;
-        if (next === this.#selected) return; // dedupe — only notify on a real change
-        const previous = this.#selected;
-        this.#selected = next;
-        this.#refreshProfile();
-        this.#renderList();
-        this.#emit("kora-handle-select", { name: next, previous, source });
+        return this.#store.state.selectedHandle;
     }
 
     protected override template(): string {
@@ -74,8 +69,8 @@ export class KoraWalletPanel extends KoraElement {
     }
 
     override attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
-        if (name === "selected") this.selected = value;
-        else if (name === "env") this.#refreshProfile();
+        if (name === "selected") this.#store.selectHandle(value);
+        else if (name === "env") this.#refreshProfile(this.#store.state);
     }
 
     protected override hydrate(): void {
@@ -86,14 +81,16 @@ export class KoraWalletPanel extends KoraElement {
         this.#refs.disconnect?.addEventListener("click", this.#onDisconnect);
         this.#refs.list?.addEventListener("click", this.#onListClick);
         this.#refs.search?.addEventListener("input", this.#onSearch);
+        document.addEventListener("kora-wallet-open", this.#onWalletOpen);
+        this.#lastSelected = this.#store.state.selectedHandle; // don't emit on initial adopt
         this.#unsubscribe = this.#store.subscribe(this.#onState);
-        this.#renderList();
     }
 
     override disconnectedCallback(): void {
         super.disconnectedCallback();
         this.#unsubscribe?.();
         this.#unsubscribe = null;
+        document.removeEventListener("kora-wallet-open", this.#onWalletOpen);
     }
 
     #env(): KoraNetwork | undefined {
@@ -102,15 +99,22 @@ export class KoraWalletPanel extends KoraElement {
     }
 
     #onState = (state: WalletState): void => {
-        this.#address = state.usedAddressHex ?? state.changeAddressHex ?? null;
-        this.#refreshProfile();
+        this.#refreshProfile(state);
+        this.#renderList(state);
+        if (state.selectedHandle !== this.#lastSelected) {
+            const source = this.#pendingUserSelect === state.selectedHandle ? "user" : "programmatic";
+            this.#emit("kora-handle-select", { name: state.selectedHandle, previous: this.#lastSelected, source });
+            this.#lastSelected = state.selectedHandle;
+            this.#pendingUserSelect = null;
+        }
     };
 
-    #refreshProfile(): void {
-        const handle = this.#selected ?? "";
+    #refreshProfile(state: WalletState): void {
+        const handle = state.selectedHandle ?? "";
+        const image = state.handles.find((h) => h.name === handle)?.image ?? null;
         if (this.#refs.handle) this.#refs.handle.textContent = handle;
-        if (this.#refs.avatar) this.#refs.avatar.textContent = (handle[0] ?? "$").toUpperCase();
-        if (this.#refs.addr) this.#refs.addr.textContent = short(this.#address);
+        if (this.#refs.avatar) this.#refs.avatar.innerHTML = profileAvatarHTML(handle, image);
+        if (this.#refs.addr) this.#refs.addr.textContent = short(state.address ?? state.changeAddressHex);
 
         const env = this.#env();
         if (handle) {
@@ -123,12 +127,12 @@ export class KoraWalletPanel extends KoraElement {
         this.#refs.personalize?.parentElement?.toggleAttribute("hidden", !hasHandle);
     }
 
-    #renderList(): void {
+    #renderList(state: WalletState): void {
         const list = this.#refs.list;
         if (!list) return;
         const query = this.#search.trim().toLowerCase();
-        const rows = this.#handles
-            .filter((h) => h.name !== this.#selected)
+        const rows = state.handles
+            .filter((h) => h.name !== state.selectedHandle)
             .filter((h) => !query || h.name.toLowerCase().includes(query));
         list.innerHTML = rows.length
             ? rows.map((h) => handleRowHTML(h, false)).join("")
@@ -137,18 +141,26 @@ export class KoraWalletPanel extends KoraElement {
 
     #onSearch = (event: Event): void => {
         this.#search = (event.target as HTMLInputElement).value;
-        this.#renderList();
+        this.#renderList(this.#store.state);
     };
 
     #onListClick = (event: Event): void => {
         const row = (event.target as Element).closest<HTMLElement>(".kora-wallet-panel__row");
         const name = row?.dataset.name;
-        if (name) this.#applySelected(name, "user");
+        if (name) {
+            this.#pendingUserSelect = name; // tag the resulting state change as a user pick
+            this.#store.selectHandle(name);
+        }
     };
 
     #onDisconnect = (): void => {
         this.#store.disconnect();
+        this.closest("kora-drawer")?.removeAttribute("open");
         this.#emit("kora-disconnect");
+    };
+
+    #onWalletOpen = (): void => {
+        this.closest("kora-drawer")?.setAttribute("open", "");
     };
 
     #emit(type: string, detail?: unknown): void {

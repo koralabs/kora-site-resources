@@ -10,12 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kora Site Resources — demo</title>
 
-    <!-- The handle-resolution adapter imports the bare specifier "cborg"; map it for native ESM.
-         (Sites with a bundler don't need this — their bundler resolves it.) -->
-    <script type="importmap">
-        { "imports": { "cborg": "/node_modules/cborg/cborg.js" } }
-    </script>
-
     <link rel="stylesheet" href="/demo.css" />
 </head>
 <body>
@@ -101,63 +95,13 @@
     <!-- Register all custom elements. -->
     <script type="module" src="/lib/index.js"></script>
 
-    <!-- Interactivity: wallet connect/auto-reconnect, handle resolution, and the drawer/modal/toast wiring. -->
+    <!-- Interactivity: the wallet button, drawer, and panel wire themselves now — connecting resolves
+         the wallet's handles (with images), the connected pill opens the drawer, and the panel fills
+         itself. This page only has to demo the modal/toast buttons and kick off auto-reconnect. -->
     <script type="module">
-        import {
-            walletStore, rememberHandle, recallHandle,
-            fetchWalletHandles, HANDLE_POLICY_DEMI, koraToast,
-        } from "/lib/index.js";
-        import { resolveWalletHandles, chooseDefaultHandle } from "/lib/wallet/handles.js";
-
-        const walletBtn = document.querySelector("kora-wallet-button");
-        const panel = document.querySelector("kora-wallet-panel");
-        const drawer = document.querySelector("kora-drawer");
-
-        // On connect, fetch the full handle list (incl. virtual SubHandles) from the Handle API; fall
-        // back to the trustless on-chain CBOR resolver if the API is unreachable. Prefer the
-        // last-remembered handle as the default.
-        async function loadHandles(s) {
-            let items;
-            try {
-                const api = await fetchWalletHandles(s.rewardAddressHex);
-                items = api.map((h) => ({
-                    name: h.name,
-                    virtual: h.handle_type === "virtual_subhandle",
-                    isDeMi: h.policy === HANDLE_POLICY_DEMI,
-                }));
-            } catch {
-                items = resolveWalletHandles(s.balanceCbor).map((h) => ({
-                    name: h.name, isDeMi: h.isDeMi, virtual: h.name.includes("@"),
-                }));
-            }
-            const firstRegular = items.find((i) => !i.virtual && !i.name.includes("@"))?.name;
-            const chosen = chooseDefaultHandle(items, recallHandle() ?? firstRegular);
-            // Setting handles + selected fires kora-handle-select (even for this auto-select), which
-            // the single listener below uses to update the header pill.
-            if (panel) { panel.handles = items; panel.selected = chosen; }
-        }
-
-        let loadedFor = null;
-        walletStore.subscribe((s) => {
-            if (s.status === "connected") {
-                if (loadedFor !== s.rewardAddressHex) { loadedFor = s.rewardAddressHex; loadHandles(s); }
-            } else {
-                loadedFor = null;
-                if (panel) { panel.handles = []; panel.selected = null; } // → kora-handle-select(name:null)
-            }
-        });
-
-        // One place to react to the chosen handle changing — user pick OR auto-select.
-        panel?.addEventListener("kora-handle-select", (e) => {
-            if (e.detail.name) walletBtn?.setAttribute("handle", e.detail.name);
-            else walletBtn?.removeAttribute("handle");
-            if (e.detail.source === "user") rememberHandle(e.detail.name); // remember explicit choices only
-        });
-        panel?.addEventListener("kora-disconnect", () => drawer?.removeAttribute("open"));
+        import { walletStore, koraToast } from "/lib/index.js";
 
         document.addEventListener("click", (e) => {
-            if (e.target.closest("kora-handle-indicator")) drawer?.setAttribute("open", "");
-            // (The footer's "Clear site data" is wired by the kora-footer component itself.)
             const label = e.target.closest("kora-button")?.getAttribute("label");
             if (label === "Open dialog") document.querySelector("kora-modal")?.setAttribute("open", "");
             else if (label === "Success toast") koraToast.success("Minted!", { message: "Transaction submitted." });

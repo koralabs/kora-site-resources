@@ -45,6 +45,7 @@ test("kora-wallet-button connects and shows the indicator", async () => {
         document.body.innerHTML = "";
         const el = document.createElement("kora-wallet-button");
         el.store = new WalletStore(); // isolate from the shared singleton
+        el.store.autoResolve = false; // no network in these tests; handle-driven label covered below
         document.body.appendChild(el);
         await tick();
 
@@ -70,6 +71,7 @@ test("kora-wallet-button shows a picker for multiple wallets", async () => {
         document.body.innerHTML = "";
         const el = document.createElement("kora-wallet-button");
         el.store = new WalletStore();
+        el.store.autoResolve = false;
         document.body.appendChild(el);
         await tick();
 
@@ -91,6 +93,7 @@ test("kora-wallet-button prefers a resolved handle when provided", async () => {
         document.body.innerHTML = "";
         const el = document.createElement("kora-wallet-button");
         el.store = new WalletStore();
+        el.store.autoResolve = false;
         el.setAttribute("handle", "bigirishlion");
         document.body.appendChild(el);
         await tick();
@@ -100,5 +103,30 @@ test("kora-wallet-button prefers a resolved handle when provided", async () => {
         const indicator = el.querySelector(".kora-wallet__indicator");
         assert.equal(indicator.getAttribute("handle"), "bigirishlion");
         assert.equal(indicator.getAttribute("symbol"), "$");
+    });
+});
+
+// Feature: with no `handle` attribute, the button shows the store's auto-selected handle (with $),
+// and clicking the connected pill dispatches kora-wallet-open (so a drawer can self-open).
+test("kora-wallet-button reflects the selected handle + dispatches kora-wallet-open", async () => {
+    await withFakeCardano({ eternl: fakeWallet("Eternl") }, async () => {
+        document.body.innerHTML = "";
+        const el = document.createElement("kora-wallet-button");
+        el.store = new WalletStore();
+        el.store.autoResolve = false;
+        document.body.appendChild(el);
+        await tick();
+        await el.store.connect("eternl");
+        el.store.setHandles([{ name: "bigirishlion", virtual: false, isDeMi: false, image: null }]);
+        await flush();
+
+        const indicator = el.querySelector(".kora-wallet__indicator");
+        assert.equal(indicator.getAttribute("handle"), "bigirishlion");
+        assert.equal(indicator.getAttribute("symbol"), "$");
+
+        let opened = false;
+        el.addEventListener("kora-wallet-open", () => (opened = true));
+        indicator.click();
+        assert.equal(opened, true);
     });
 });

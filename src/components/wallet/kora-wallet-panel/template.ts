@@ -12,6 +12,16 @@ export interface KoraHandleItem {
     isDeMi?: boolean;
     /** Virtual SubHandle (issued off-wallet; flagged by the app from the BFF). */
     virtual?: boolean;
+    /** Raw image reference (`ipfs://…` or https); rendered via `<kora-ipfs-image>` gateway failover. */
+    image?: string | null;
+}
+
+/** A small handle image (or a letter placeholder) — shared by the profile avatar + list rows. */
+function handleAvatarHTML(name: string, image: string | null | undefined, cls: string): string {
+    if (image) {
+        return `<kora-ipfs-image class="${cls}" src="${escapeAttr(image)}" alt="" width="96"></kora-ipfs-image>`;
+    }
+    return `<span class="${cls} ${cls}--placeholder">${escapeHtml((name[0] ?? "$").toUpperCase())}</span>`;
 }
 
 const GEAR_SVG =
@@ -30,7 +40,7 @@ export const WALLET_PANEL_SHELL =
     `<div class="kora-wallet-panel">` +
     `<div class="kora-glass kora-wallet-panel__profile">` +
     `<div class="kora-wallet-panel__head">` +
-    `<div class="kora-wallet-panel__avatar" data-ref="avatar">$</div>` +
+    `<div class="kora-wallet-panel__avatar" data-ref="avatar"></div>` +
     `<div class="kora-wallet-panel__id">` +
     `<p class="kora-wallet-panel__handle"><span class="kora-wallet-panel__dollar">$</span><span data-ref="handle"></span></p>` +
     `<p class="kora-wallet-panel__addr" data-ref="addr"></p>` +
@@ -61,8 +71,16 @@ export function handleRowHTML(item: KoraHandleItem, selected: boolean): string {
           : "";
     return (
         `<button class="kora-wallet-panel__row${selected ? " is-selected" : ""}" type="button" data-name="${escapeAttr(item.name)}">` +
+        `<span class="kora-wallet-panel__row-main">` +
+        handleAvatarHTML(item.name, item.image, "kora-wallet-panel__row-avatar") +
         `<span class="kora-wallet-panel__row-name"><span class="kora-wallet-panel__dollar">$</span>${escapeHtml(item.name)}</span>` +
+        `</span>` +
         badge +
         `</button>`
     );
+}
+
+/** Profile-avatar markup (image with failover, or letter placeholder) — set as innerHTML by the element. */
+export function profileAvatarHTML(name: string, image: string | null | undefined): string {
+    return handleAvatarHTML(name, image, "kora-wallet-panel__avatar-media");
 }

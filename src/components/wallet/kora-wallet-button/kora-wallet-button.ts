@@ -53,6 +53,9 @@ export class KoraWalletButton extends KoraElement<KoraWalletButtonState> {
         this.#indicator = this.querySelector(".kora-wallet__indicator");
         this.#connectBtn?.addEventListener("click", this.#onConnectClick);
         this.#picker?.addEventListener("click", this.#onPickerClick);
+        // Clicking the connected handle pill asks the wallet drawer to open (a <kora-wallet-panel>
+        // listens for this), so the pill→drawer link needs no app wiring.
+        this.#indicator?.addEventListener("click", this.#onIndicatorClick);
         this.#unsubscribe = this.#store.subscribe(this.#sync);
     }
 
@@ -83,10 +86,16 @@ export class KoraWalletButton extends KoraElement<KoraWalletButtonState> {
     };
 
     #applyConnectedLabel(state: WalletState = this.#store.state): void {
-        const handle = this.getAttribute("handle");
+        // The `handle` attribute overrides; otherwise show the store's auto-selected handle, falling
+        // back to the wallet name until handles resolve.
+        const handle = this.getAttribute("handle") ?? state.selectedHandle;
         this.state.label = handle ?? state.walletName ?? "wallet";
         this.state.symbol = handle ? "$" : "";
     }
+
+    #onIndicatorClick = (): void => {
+        this.dispatchEvent(new CustomEvent("kora-wallet-open", { bubbles: true, composed: true }));
+    };
 
     #onConnectClick = (): void => {
         if (!this.#picker) return;

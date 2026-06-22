@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { WalletStore } from "../lib/wallet/index.js";
+import { WalletStore, forgetHandle } from "../lib/wallet/index.js";
 import "../lib/components/wallet/kora-wallet-panel/index.js";
 
 const tick = () => new Promise((resolve) => queueMicrotask(resolve));
@@ -21,9 +21,9 @@ const fakeWallet = {
     icon: "",
     enable: async () => ({
         getNetworkId: async () => 1,
-        getChangeAddress: async () => "01changehexaddressvalue0000",
+        getChangeAddress: async () => `01${"0".repeat(112)}`, // valid mainnet base address hex
         getRewardAddresses: async () => ["e1stakehex"],
-        getUsedAddresses: async () => ["01usedhexaddressvalue1111111"],
+        getUsedAddresses: async () => [`01${"0".repeat(112)}`],
         getBalance: async () => "1a002dc6c0",
         signTx: async (t) => t,
         submitTx: async () => "tx",
@@ -31,8 +31,10 @@ const fakeWallet = {
 };
 
 async function mountConnectedPanel() {
+    forgetHandle(); // deterministic default selection (no remembered handle)
     document.body.innerHTML = "";
     const store = new WalletStore();
+    store.autoResolve = false; // feed handles explicitly below instead of hitting the network
     const panel = document.createElement("kora-wallet-panel");
     panel.store = store;
     panel.setAttribute("env", "mainnet");
@@ -40,7 +42,11 @@ async function mountConnectedPanel() {
     await tick();
     await store.connect("eternl");
     await flush();
-    panel.handles = [{ name: "amber" }, { name: "apprentices" }, { name: "sub@hal", virtual: true }];
+    panel.handles = [
+        { name: "amber", virtual: false, isDeMi: false, image: null },
+        { name: "apprentices", virtual: false, isDeMi: false, image: null },
+        { name: "sub@hal", virtual: true, isDeMi: false, image: null },
+    ];
     panel.selected = "amber";
     return { store, panel };
 }
@@ -50,7 +56,7 @@ test("kora-wallet-panel renders the profile + action links", async () => {
     await withFakeCardano({ eternl: fakeWallet }, async () => {
         const { panel } = await mountConnectedPanel();
         assert.equal(panel.querySelector('[data-ref="handle"]').textContent, "amber");
-        assert.ok(panel.querySelector('[data-ref="addr"]').textContent.length > 0, "address shown");
+        assert.match(panel.querySelector('[data-ref="addr"]').textContent, /^addr1/, "friendly addr shown");
         assert.equal(panel.querySelector('[data-ref="portal"]').getAttribute("href"), "https://handle.me/amber");
         assert.equal(
             panel.querySelector('[data-ref="personalize"]').getAttribute("href"),
@@ -67,6 +73,27 @@ test("kora-wallet-panel lists other handles with badges", async () => {
         assert.deepEqual(names, ["apprentices", "sub@hal"]); // 'amber' (selected) excluded
         const virtualRow = panel.querySelector('.kora-wallet-panel__row[data-name="sub@hal"]');
         assert.match(virtualRow.querySelector(".kora-wallet-panel__badge").textContent, /Virtual/);
+    });
+});
+
+// Feature: handles with an image render a <kora-ipfs-image> avatar (failover), not a placeholder.
+test("kora-wallet-panel shows handle images via kora-ipfs-image", async () => {
+    await withFakeCardano({ eternl: fakeWallet }, async () => {
+        const { panel } = await mountConnectedPanel();
+        panel.handles = [
+            { name: "amber", virtual: false, isDeMi: false, image: "ipfs://cidSelected" },
+            { name: "apprentices", virtual: false, isDeMi: false, image: "ipfs://cidRow" },
+        ];
+        panel.selected = "amber";
+        await tick();
+        // Profile avatar = the selected handle's image.
+        const avatar = panel.querySelector('[data-ref="avatar"] kora-ipfs-image');
+        assert.ok(avatar, "profile avatar uses kora-ipfs-image");
+        assert.equal(avatar.getAttribute("src"), "ipfs://cidSelected");
+        // List row carries its own image too.
+        const rowImg = panel.querySelector('.kora-wallet-panel__row[data-name="apprentices"] kora-ipfs-image');
+        assert.ok(rowImg, "row uses kora-ipfs-image");
+        assert.equal(rowImg.getAttribute("src"), "ipfs://cidRow");
     });
 });
 
@@ -89,6 +116,7 @@ test("kora-wallet-panel emits kora-handle-select (source=user) on row click", as
         let detail = null;
         panel.addEventListener("kora-handle-select", (e) => (detail = e.detail));
         panel.querySelector('.kora-wallet-panel__row[data-name="apprentices"]').click();
+        await tick();
         assert.equal(detail.name, "apprentices");
         assert.equal(detail.previous, "amber");
         assert.equal(detail.source, "user");
@@ -106,6 +134,7 @@ test("kora-handle-select fires on programmatic selection and dedupes", async () 
         panel.addEventListener("kora-handle-select", (e) => events.push(e.detail));
 
         panel.selected = "apprentices"; // real change → emit
+        await tick();
         assert.equal(events.length, 1);
         assert.deepEqual(
             { name: events[0].name, previous: events[0].previous, source: events[0].source },
@@ -113,9 +142,11 @@ test("kora-handle-select fires on programmatic selection and dedupes", async () 
         );
 
         panel.selected = "apprentices"; // unchanged → no emit
+        await tick();
         assert.equal(events.length, 1);
 
         panel.selected = null; // change → emit with name null (e.g. on disconnect)
+        await tick();
         assert.equal(events.length, 2);
         assert.equal(events[1].name, null);
     });

@@ -42,6 +42,9 @@ export type { KoraMenuProps, KoraMenuState } from "../components/chrome/kora-men
 
 export type { KoraHandleItem } from "../components/wallet/kora-wallet-panel/template.js";
 
+export { renderKoraIpfsImage } from "../components/media/kora-ipfs-image/template.js";
+export type { KoraIpfsImageProps } from "../components/media/kora-ipfs-image/template.js";
+
 export { renderKoraDrawer } from "../components/overlay/kora-drawer/template.js";
 export type { KoraDrawerProps, KoraDrawerState } from "../components/overlay/kora-drawer/template.js";
 

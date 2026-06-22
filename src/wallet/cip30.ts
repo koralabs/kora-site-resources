@@ -4,18 +4,40 @@
  * optional @cardano-sdk adapter) decode. Mirrors the established handle.me `walletConnector.ts`.
  */
 
-/** A connected CIP-30 wallet API (the subset we use). */
+/** CIP-30 `signData` result — a CIP-8 COSE_Sign1 signature + the COSE_Key, both hex. */
+export interface Cip30DataSignature {
+    signature: string;
+    key: string;
+}
+
+/** CIP-30 pagination argument (`{ page, limit }`). */
+export interface Cip30Paginate {
+    page: number;
+    limit: number;
+}
+
+/**
+ * A connected CIP-30 wallet API. We `enable()` and return the wallet's object VERBATIM — no wrapper,
+ * no proxy — so this type describes the full standard CIP-30 surface (not a subset). In particular
+ * `signData` (CIP-8 / data signing), `getCollateral`, and `getExtensions` are all available; the
+ * store only *calls* the few it needs internally, but consumers get the whole API typed.
+ */
 export interface Cip30Api {
     getNetworkId: () => Promise<number>;
+    getExtensions?: () => Promise<{ cip: number }[]>;
     getChangeAddress: () => Promise<string>;
     getRewardAddresses: () => Promise<string[]>;
-    getUsedAddresses: () => Promise<string[]>;
-    getUnusedAddresses?: () => Promise<string[]>;
-    getUtxos: () => Promise<string[] | undefined>;
+    getUsedAddresses: (paginate?: Cip30Paginate) => Promise<string[]>;
+    getUnusedAddresses: () => Promise<string[]>;
+    getUtxos: (amount?: string, paginate?: Cip30Paginate) => Promise<string[] | undefined>;
+    getCollateral?: (params?: { amount?: string }) => Promise<string[] | undefined>;
     getBalance: () => Promise<string>;
+    /** CIP-8 data signing — sign an arbitrary payload with the key for `address`. */
+    signData: (address: string, payload: string) => Promise<Cip30DataSignature>;
     signTx: (tx: string, partialSign?: boolean) => Promise<string>;
     submitTx: (tx: string) => Promise<string>;
     cip95?: { getPubDRepKey: () => Promise<string> };
+    experimental?: Record<string, unknown>;
 }
 
 /** `enable` options. `extensions` requests optional wallet extensions (e.g. CIP-95 governance). */

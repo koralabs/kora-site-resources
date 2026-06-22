@@ -32,8 +32,9 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `kora-footer` | handle.me | renders shared default links + appends site links; built-in Clear-site-data action; `default-links="false"` to opt out |
 | `kora-background` | hal.handle.me | dark gradient + optional grid + blur blobs |
 | `kora-handle-indicator` | handle.me | chosen-handle pill, emits `click` |
-| `kora-wallet-button` | handle.me | connect picker → connecting → connected indicator (WalletStore) |
-| `kora-wallet-panel` | handle.me | drawer body: profile, actions, search, handle list + badges. Fires `kora-handle-select` `{name, previous, source}` on any selection change (user or auto) |
+| `kora-wallet-button` | handle.me | connect picker → connecting → connected indicator (WalletStore); shows the auto-selected `$handle`; clicking the pill dispatches `kora-wallet-open` |
+| `kora-wallet-panel` | handle.me | drawer body, **self-populating**: on connect the store resolves the wallet's handles (images via gateway failover) + friendly `addr1…`; profile, actions, search, handle list + badges. Opens its `<kora-drawer>` on `kora-wallet-open`. Fires `kora-handle-select` `{name, previous, source}` on any selection change (user or auto) |
+| `kora-ipfs-image` | handle.me | `<img>` with the shared IPFS gateway failover (our → free → optional proxy); `<kora-ipfs-image src="ipfs://…" width="64">` |
 | `kora-drawer` | handle.me | opt-in slide-out panel, `open` attr, `kora-drawer-close` event |
 | `kora-modal` | handle.me | centered dialog shell (glass + gradient top border) |
 | `kora-loader` | handle.me | dual-ring spinner |
@@ -48,9 +49,29 @@ See [docs/architecture.md](docs/architecture.md) for the design decisions and ra
 | `.kora-scrollbar` / `.kora-focus-ring` / `.kora-inset-shadow*` | handle.me | style utilities (`styles/utilities.css`) |
 
 Plus non-visual modules: `/env` (environment-aware handle.me URLs), `/wallet` (CIP-30 + reactive
-`WalletStore` + auto-reconnect), `/wallet/handles` (resolve on-chain Ada Handles from the CIP-30
-balance, offline/trustless), `/wallet/handle-api` (`fetchWalletHandles` — the full list incl. virtual
-SubHandles from the Ada Handle API, no extra deps), and `clearHandleSiteData()`.
+`WalletStore` that auto-reconnects AND auto-resolves the wallet's handles + a friendly `addr1…`
+address on connect), `/wallet/handles` (resolve on-chain Ada Handles from the CIP-30 balance,
+offline/trustless), `/wallet/handle-api` (`fetchWalletHandles` — the full list incl. virtual
+SubHandles from the Ada Handle API, no extra deps), `/ipfs` (shared gateway-failover image resolver
++ `configureKoraIpfs()`), and `clearHandleSiteData()`.
+
+### Wallet UX is turnkey
+
+Drop the wallet button + panel in and the kit wires the rest — no app glue:
+
+```html
+<kora-wallet-button slot="actions"></kora-wallet-button>
+<kora-drawer title="Wallet & Handles"><kora-wallet-panel></kora-wallet-panel></kora-drawer>
+<script type="module">
+  import { walletStore } from "@koralabs/kora-site-resources";
+  walletStore.autoConnect(); // silent reconnect; on connect the panel fills itself
+</script>
+```
+
+On connect the store resolves the wallet's handles (with images), auto-selects a default (the
+last-remembered one, else the first non-virtual), and exposes a friendly `addr1…` address — the
+button shows the `$handle`, the panel lists the rest, and clicking the pill opens the drawer. Opt
+out with `walletStore.autoResolve = false`, or feed a custom list via `panel.handles`.
 
 ## How it works (no framework)
 

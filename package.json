@@ -1,6 +1,6 @@
 {
     "name": "@koralabs/kora-site-resources",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada Handle sites. No framework — vanilla custom elements (Proxy/Reflect reactivity), light DOM, SSR-friendly.",
     "type": "module",
     "license": "ISC",
@@ -44,6 +44,10 @@
         "./wallet/handle-api": {
             "types": "./wallet/handle-api.d.ts",
             "default": "./wallet/handle-api.js"
+        },
+        "./ipfs": {
+            "types": "./ipfs/index.d.ts",
+            "default": "./ipfs/index.js"
         },
         "./tokens": {
             "types": "./tokens/index.d.ts",

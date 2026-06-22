@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { WalletStore, listAvailableWallets } from "../lib/wallet/index.js";
+import { WalletStore, listAvailableWallets, forgetHandle } from "../lib/wallet/index.js";
 
 const tick = () => new Promise((resolve) => queueMicrotask(resolve));
 
@@ -40,6 +40,7 @@ test("listAvailableWallets discovers injected wallets", async () => {
 test("WalletStore.connect populates state and notifies", async () => {
     await withFakeCardano({ eternl: fakeWallet() }, async () => {
         const store = new WalletStore();
+        store.autoResolve = false; // exercise connection only; handle resolution covered separately
         const seen = [];
         store.subscribe((s) => seen.push(s.status));
 
@@ -56,6 +57,23 @@ test("WalletStore.connect populates state and notifies", async () => {
 
         // signing delegates to the live api
         assert.equal(await store.signTx("abc"), "signed:abc");
+    });
+});
+
+// Feature: the enabled wallet is returned VERBATIM (no wrapper), so CIP-8 signData is available —
+// both on store.api and via the store.signData convenience.
+test("WalletStore exposes the wallet's CIP-8 signData", async () => {
+    const wallet = fakeWallet({
+        signData: async (addr, payload) => ({ signature: `sig:${addr}:${payload}`, key: "cosekey" }),
+    });
+    await withFakeCardano({ eternl: wallet }, async () => {
+        const store = new WalletStore();
+        store.autoResolve = false;
+        await store.connect("eternl");
+        // The raw enabled API carries signData (we don't strip it).
+        assert.equal(typeof store.api.signData, "function");
+        const sig = await store.signData("addrhex", "deadbeef");
+        assert.deepEqual(sig, { signature: "sig:addrhex:deadbeef", key: "cosekey" });
     });
 });
 
@@ -76,11 +94,68 @@ test("WalletStore.connect surfaces enable failures", async () => {
 test("WalletStore.disconnect resets state", async () => {
     await withFakeCardano({ eternl: fakeWallet() }, async () => {
         const store = new WalletStore();
+        store.autoResolve = false;
         await store.connect("eternl");
         store.disconnect();
         assert.equal(store.state.status, "disconnected");
         assert.equal(store.state.walletKey, null);
         assert.equal(store.state.rewardAddressHex, null);
+        assert.deepEqual(store.state.handles, []);
+        assert.equal(store.state.selectedHandle, null);
         await assert.rejects(() => store.signTx("abc"), /not connected/);
     });
+});
+
+// Feature: connect() derives a friendly bech32 address from the change-address hex.
+test("WalletStore.connect derives a friendly bech32 address", async () => {
+    const mainnetBase = `01${"0".repeat(112)}`; // header 0x01 = base address, network id 1 (mainnet)
+    const wallet = fakeWallet({ getChangeAddress: async () => mainnetBase });
+    await withFakeCardano({ eternl: wallet }, async () => {
+        const store = new WalletStore();
+        store.autoResolve = false;
+        await store.connect("eternl");
+        assert.match(store.state.address, /^addr1/, "change address encoded as addr1…");
+    });
+});
+
+// Feature: connect() auto-resolves the wallet's handles from the API and auto-selects a default.
+test("WalletStore.connect auto-resolves handles + selects a default", async () => {
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async () =>
+        new Response(
+            JSON.stringify([
+                { name: "amber", handle_type: "handle", image: "ipfs://cidA" },
+                { name: "sub@amber", handle_type: "virtual_subhandle", image: "ipfs://cidB" },
+            ]),
+            { status: 200, headers: { "content-type": "application/json" } },
+        );
+    try {
+        forgetHandle(); // no remembered handle → default is the first non-virtual
+        await withFakeCardano({ eternl: fakeWallet() }, async () => {
+            const store = new WalletStore(); // autoResolve defaults true
+            await store.connect("eternl");
+            assert.equal(store.state.handles.length, 2);
+            assert.equal(store.state.handles[0].name, "amber");
+            assert.equal(store.state.handles[0].image, "ipfs://cidA");
+            assert.equal(store.state.handles[1].virtual, true);
+            assert.equal(store.state.selectedHandle, "amber"); // first non-virtual handle
+        });
+    } finally {
+        globalThis.fetch = realFetch;
+    }
+});
+
+// Feature: selectHandle changes + remembers the active handle; setHandles re-picks the default.
+test("WalletStore.selectHandle + setHandles", async () => {
+    forgetHandle();
+    const store = new WalletStore();
+    store.setHandles([
+        { name: "alpha", virtual: false, isDeMi: false, image: null },
+        { name: "beta", virtual: false, isDeMi: false, image: null },
+    ]);
+    assert.equal(store.state.selectedHandle, "alpha"); // first non-virtual
+    store.selectHandle("beta");
+    assert.equal(store.state.selectedHandle, "beta");
+    store.selectHandle("beta"); // unchanged → still beta
+    assert.equal(store.state.selectedHandle, "beta");
 });

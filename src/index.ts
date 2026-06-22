@@ -10,6 +10,7 @@ export * from "./env/index.js"; // includes the link-set helpers (re-exported fr
 export { clearHandleSiteData } from "./site/clear-site-data.js";
 export type { ClearSiteDataOptions } from "./site/clear-site-data.js";
 export * from "./wallet/index.js";
+export * from "./ipfs/index.js"; // shared IPFS gateway failover (config + resolver)
 
 export * from "./components/primitives/kora-button/index.js";
 export * from "./components/chrome/kora-brand/index.js";
@@ -20,6 +21,7 @@ export * from "./components/chrome/kora-menu/index.js";
 export * from "./components/wallet/kora-handle-indicator/index.js";
 export * from "./components/wallet/kora-wallet-button/index.js";
 export * from "./components/wallet/kora-wallet-panel/index.js";
+export * from "./components/media/kora-ipfs-image/index.js";
 export * from "./components/overlay/kora-drawer/index.js";
 export * from "./components/overlay/kora-modal/index.js";
 export * from "./components/feedback/kora-loader/index.js";

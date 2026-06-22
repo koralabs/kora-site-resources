@@ -24,10 +24,23 @@
         height: 3rem;
         flex: none;
         border-radius: var(--kora-radius-lg);
-        background: linear-gradient(135deg, var(--kora-color-accent), var(--kora-color-primary));
-        color: var(--kora-color-primary-contrast);
+        overflow: hidden;
         font-weight: var(--kora-font-weight-bold);
         font-size: var(--kora-text-lg);
+    }
+
+    /* The handle image fills the avatar; the placeholder keeps the gradient + initial. */
+    .kora-wallet-panel__avatar-media {
+        width: 100%;
+        height: 100%;
+    }
+    .kora-wallet-panel__avatar-media--placeholder,
+    .kora-wallet-panel__row-avatar--placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--kora-color-accent), var(--kora-color-primary));
+        color: var(--kora-color-primary-contrast);
     }
 
     .kora-wallet-panel__id {
@@ -176,6 +189,23 @@
     .kora-wallet-panel__row.is-selected {
         background: var(--kora-drawer-blue);
         border-color: transparent;
+    }
+
+    .kora-wallet-panel__row-main {
+        display: flex;
+        align-items: center;
+        gap: var(--kora-space-3);
+        min-width: 0;
+    }
+
+    .kora-wallet-panel__row-avatar {
+        width: 1.75rem;
+        height: 1.75rem;
+        flex: none;
+        border-radius: var(--kora-radius-md);
+        overflow: hidden;
+        font-size: var(--kora-text-sm);
+        font-weight: var(--kora-font-weight-bold);
     }
 
     .kora-wallet-panel__row-name {

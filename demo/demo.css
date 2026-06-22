@@ -13,6 +13,7 @@
 @import url("/lib/components/wallet/kora-handle-indicator/kora-handle-indicator.css");
 @import url("/lib/components/wallet/kora-wallet-button/kora-wallet-button.css");
 @import url("/lib/components/wallet/kora-wallet-panel/kora-wallet-panel.css");
+@import url("/lib/components/media/kora-ipfs-image/kora-ipfs-image.css");
 @import url("/lib/components/overlay/kora-drawer/kora-drawer.css");
 @import url("/lib/components/overlay/kora-modal/kora-modal.css");
 @import url("/lib/components/feedback/kora-loader/kora-loader.css");
