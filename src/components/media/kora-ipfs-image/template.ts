@@ -12,18 +12,21 @@ export interface KoraIpfsImageProps {
     alt?: string;
     width?: number;
     class?: string;
+    /** Server-signed NFTCDN URL — the fingerprint-based recovery tier, tried after IPFS gateways. */
+    nftcdnUrl?: string;
 }
 
 export const IPFS_IMAGE_INNER = `<img class="kora-ipfs-image__img" data-ref="img" alt="">`;
 
 export function renderKoraIpfsImage(props: KoraIpfsImageProps): string {
-    const first = ipfsImageUrls(props.src, props.width)[0] ?? "";
+    const first = ipfsImageUrls(props.src, props.width, { nftcdnUrl: props.nftcdnUrl })[0] ?? "";
     const cls = props.class ? ` class="${escapeAttr(props.class)}"` : "";
     const width = props.width ? ` width="${props.width}"` : "";
+    const nftcdn = props.nftcdnUrl ? ` nftcdn-url="${escapeAttr(props.nftcdnUrl)}"` : "";
     const alt = escapeAttr(props.alt ?? "");
     const seeded = first ? ` src="${escapeAttr(first)}"` : "";
     return (
-        `<kora-ipfs-image data-kora-ssr${cls} src="${escapeAttr(props.src)}"${width}>` +
+        `<kora-ipfs-image data-kora-ssr${cls} src="${escapeAttr(props.src)}"${width}${nftcdn}>` +
         `<img class="kora-ipfs-image__img" alt="${alt}"${seeded}>` +
         `</kora-ipfs-image>`
     );

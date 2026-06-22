@@ -28,17 +28,30 @@ export function gatewayUrl(gateway: IpfsGateway, cid: string, width: number): st
 }
 
 /**
- * Ordered candidate URLs for a source (our gateways → free gateways → proxy). A non-IPFS https
- * source returns just itself; an unrecognized source returns []. Useful for SSR (use the first) or
- * a sequential `<img onerror>` fallback.
+ * Ordered candidate URLs for a source (our gateways → free gateways → NFTCDN → proxy). A non-IPFS
+ * https source returns just itself; an unrecognized source returns []. Pass `opts.nftcdnUrl` (a
+ * server-signed NFTCDN URL) to add the fingerprint-based recovery tier. Useful for SSR (use the
+ * first) or a sequential `<img onerror>` fallback.
  */
-export function ipfsImageUrls(src: string | null | undefined, width?: number): string[] {
-    if (!src) return [];
+export function ipfsImageUrls(
+    src: string | null | undefined,
+    width?: number,
+    opts: { nftcdnUrl?: string | null } = {},
+): string[] {
     const cfg = getKoraIpfsConfig();
     const w = width ?? cfg.width;
-    const cid = extractIpfsCid(src);
-    if (!cid) return HTTP.test(src) ? [src] : [];
+    const cid = src ? extractIpfsCid(src) : null;
+    if (!cid) {
+        // No IPFS CID: a direct https source loads as-is; a pre-signed NFTCDN URL is the only
+        // other candidate (e.g. an NFT whose metadata image never resolved to a CID).
+        const urls: string[] = [];
+        if (src && HTTP.test(src)) urls.push(src);
+        if (opts.nftcdnUrl) urls.push(opts.nftcdnUrl);
+        return urls;
+    }
     const urls = [...cfg.ourGateways, ...cfg.freeGateways].map((g) => gatewayUrl(g, cid, w));
+    // NFTCDN tier (server-signed, fingerprint-based): after our/free, before any proxy.
+    if (opts.nftcdnUrl) urls.push(opts.nftcdnUrl);
     if (cfg.proxy) urls.push(cfg.proxy(cid, w));
     return urls;
 }
@@ -81,24 +94,36 @@ export const raceImageLoad: ImageProbe = (urls, timeoutMs) =>
     });
 
 /**
- * Resolve an IPFS (or direct https) image source to a working URL via the tiered gateway failover.
- * Returns null if nothing loads. `probe` is injectable for tests. Browser-only (uses `Image()`);
- * on the server, use `ipfsImageUrls()` and emit the first candidate.
+ * Resolve an IPFS (or direct https) image source to a working URL via the tiered gateway failover:
+ * our gateways → free public gateways → NFTCDN (if `nftcdnUrl` given) → proxy. Returns null if
+ * nothing loads. `nftcdnUrl` is a server-signed NFTCDN URL (fingerprint-based) that recovers images
+ * whose IPFS pins have lapsed — compute it server-side (see `../nftcdn`) and pass it in; never sign
+ * in the browser. `probe` is injectable for tests. Browser-only (uses `Image()`); on the server use
+ * `ipfsImageUrls()` and emit the first candidate.
  */
 export async function resolveIpfsImage(
     src: string | null | undefined,
-    { width, probe = raceImageLoad }: { width?: number; probe?: ImageProbe } = {},
+    {
+        width,
+        probe = raceImageLoad,
+        nftcdnUrl,
+    }: { width?: number; probe?: ImageProbe; nftcdnUrl?: string | null } = {},
 ): Promise<string | null> {
-    if (!src) return null;
     const cfg = getKoraIpfsConfig();
     const w = width ?? cfg.width;
-    const cid = extractIpfsCid(src);
-    if (!cid) return HTTP.test(src) ? src : null;
+    const cid = src ? extractIpfsCid(src) : null;
+    if (!cid) {
+        // No IPFS CID: a direct https source loads as-is; otherwise NFTCDN is the only candidate.
+        if (src && HTTP.test(src)) return src;
+        return nftcdnUrl ? probe([nftcdnUrl], cfg.freeTimeoutMs) : null;
+    }
 
     const our = cfg.ourGateways.map((g) => gatewayUrl(g, cid, w));
     const free = cfg.freeGateways.map((g) => gatewayUrl(g, cid, w));
     let winner = await probe(our, cfg.ourTimeoutMs);
     if (!winner) winner = await probe(free, cfg.freeTimeoutMs);
+    // NFTCDN tier: a pre-signed, fingerprint-based URL — recovers assets gone from IPFS.
+    if (!winner && nftcdnUrl) winner = await probe([nftcdnUrl], cfg.freeTimeoutMs);
     if (!winner && cfg.proxy) winner = await probe([cfg.proxy(cid, w)], cfg.proxyTimeoutMs);
     return winner;
 }

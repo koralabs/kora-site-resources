@@ -86,6 +86,39 @@ test("resolveIpfsImage uses the tiered probe and short-circuits direct https", a
     assert.equal(await resolveIpfsImage(null), null);
 });
 
+// Feature: a pre-signed NFTCDN URL is the recovery tier — appended after our/free, before proxy.
+test("nftcdnUrl is the last IPFS-failover tier", () => {
+    const NFTCDN = "https://asset1abc.handles.nftcdn.io/image?tk=sig";
+    const urls = ipfsImageUrls("ipfs://CID", undefined, { nftcdnUrl: NFTCDN });
+    assert.equal(urls.length, 5); // 1 our + 3 free + nftcdn
+    assert.equal(urls.at(-1), NFTCDN); // after the gateways
+    // Proxy, when configured, comes after NFTCDN.
+    try {
+        configureKoraIpfs({ proxy: (cid, w) => `https://bff/ipfs-image?cid=${cid}&width=${w}` });
+        const withProxy = ipfsImageUrls("ipfs://CID", undefined, { nftcdnUrl: NFTCDN });
+        assert.equal(withProxy.at(-2), NFTCDN);
+        assert.equal(withProxy.at(-1), "https://bff/ipfs-image?cid=CID&width=512");
+    } finally {
+        resetKoraIpfsConfig();
+    }
+    // An asset with no resolvable CID still gets the NFTCDN candidate.
+    assert.deepEqual(ipfsImageUrls(null, undefined, { nftcdnUrl: NFTCDN }), [NFTCDN]);
+});
+
+// Feature: resolveIpfsImage falls through to nftcdnUrl only after our + free both miss.
+test("resolveIpfsImage falls through to nftcdnUrl when gateways miss", async () => {
+    const NFTCDN = "https://asset1abc.handles.nftcdn.io/image?tk=sig";
+    let call = 0;
+    const winner = await resolveIpfsImage("ipfs://CID", {
+        nftcdnUrl: NFTCDN,
+        probe: async (urls) => (call++ < 2 ? null : urls[0]), // our miss, free miss, nftcdn hits
+    });
+    assert.equal(winner, NFTCDN);
+
+    // A dead/absent src with only an NFTCDN URL still recovers.
+    assert.equal(await resolveIpfsImage(null, { nftcdnUrl: NFTCDN, probe: async (u) => u[0] }), NFTCDN);
+});
+
 // Feature: <kora-ipfs-image> resolves a direct https src onto its inner <img>.
 test("<kora-ipfs-image> sets the resolved src on its img", async () => {
     document.body.innerHTML = "";

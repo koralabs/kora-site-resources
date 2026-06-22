@@ -11,7 +11,7 @@ import { resolveIpfsImage } from "../../../ipfs/index.js";
  */
 export class KoraIpfsImage extends KoraElement {
     static get observedAttributes(): string[] {
-        return ["src", "width", "alt"];
+        return ["src", "width", "alt", "nftcdn-url"];
     }
 
     #img: HTMLImageElement | null = null;
@@ -30,7 +30,8 @@ export class KoraIpfsImage extends KoraElement {
     }
 
     override attributeChangedCallback(name: string, _old: string | null, _value: string | null): void {
-        if (this.#img && (name === "src" || name === "width" || name === "alt")) void this.#load();
+        if (this.#img && (name === "src" || name === "width" || name === "alt" || name === "nftcdn-url"))
+            void this.#load();
     }
 
     async #load(): Promise<void> {
@@ -39,13 +40,14 @@ export class KoraIpfsImage extends KoraElement {
         img.alt = this.getAttribute("alt") ?? "";
         const src = this.getAttribute("src");
         const width = Number(this.getAttribute("width")) || undefined;
+        const nftcdnUrl = this.getAttribute("nftcdn-url") || undefined;
         const token = ++this.#token; // guards against an earlier resolution finishing after a newer src
         this.removeAttribute("data-error");
-        if (!src) {
+        if (!src && !nftcdnUrl) {
             img.removeAttribute("src");
             return;
         }
-        const resolved = await resolveIpfsImage(src, { width });
+        const resolved = await resolveIpfsImage(src, { width, nftcdnUrl });
         if (token !== this.#token) return; // superseded
         if (resolved) {
             if (img.getAttribute("src") !== resolved) img.src = resolved;
