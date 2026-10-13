@@ -9,4 +9,4 @@
 CANONICAL_CONTRACT.md
 
 # C1 wallet connect and handle resolution
-src/wallet/
+src/wallet/cip30.ts
