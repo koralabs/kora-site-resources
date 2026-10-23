@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   unit:
-    name: Typecheck, build and unit tests
+    name: Typecheck and build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -18,4 +18,4 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
-      - run: npm test
+      - run: npm run build

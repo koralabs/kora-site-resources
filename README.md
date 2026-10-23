@@ -1,5 +1,9 @@
 # @koralabs/kora-site-resources
 
+## Contributor test policy
+
+Tests and coverage are local-only; never run them in GitHub Actions, including via package lifecycle scripts, composites, workflow templates, or shared helpers. Preserve local test scripts. Build, lint, publish, deploy, and production guards remain permitted. Remove obsolete required test checks when retiring them.
+
 Framework-agnostic web components, design tokens, and wallet UX shared across Kora Labs / Ada
 Handle websites. **No framework** — vanilla custom elements built on native ECMAScript/web-platform
 primitives. Drops into React, Lit, or plain HTML identically, and server-renders cleanly.
