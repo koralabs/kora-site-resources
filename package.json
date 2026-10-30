@@ -90,7 +90,7 @@
         "lucide": "^1.21.0"
     },
     "devDependencies": {
-        "@happy-dom/global-registrator": "^20.10.6",
+        "@happy-dom/global-registrator": "^21.0.4",
         "typescript": "^5.5.3"
     }
 }
