@@ -1,0 +1,28 @@
+# Exact repository-root-relative paths. No wildcards, no directory prefixes.
+# A change to any of these needs operator approval at merge time (see CANONICAL_CONTRACT.md).
+.enclave
+CANONICAL_CONTRACT.md
+# Invariant 1 and 2: what counts as a Handle, and how wallet handles are resolved
+src/wallet/policies.ts
+src/wallet/handles.ts
+src/wallet/handle-api.ts
+src/wallet/bech32.ts
+test/handles.test.mjs
+test/handle-api.test.mjs
+test/ipfs.test.mjs
+# Invariant 3: wallet connection never signs or submits by itself
+src/wallet/cip30.ts
+src/wallet/store.ts
+src/wallet/persistence.ts
+test/wallet.test.mjs
+test/persistence.test.mjs
+# Invariant 4: the signing key for image URLs stays server-side
+src/nftcdn/index.ts
+test/nftcdn.test.mjs
+# Invariant 5: which hosts links point at, per network
+src/env/index.ts
+src/env/links.ts
+test/env.test.mjs
+# Invariant 6: what gets published to npm
+package.json
+.github/workflows/deploy.yml
